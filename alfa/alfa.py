@@ -57,10 +57,11 @@ def lnprob(theta): #, data, grids):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~ Run fitting tool ~~~~~~~~~~~~~~~~~~~~~~~ #
 
-if __name__ == "__main__":    
+if __name__ == "__main__":  
     nwalkers = 256
     nsteps = 10000
     nsteps_save = 1000
+    thin = 15
 
     # use command arguments to get filename
     if len(sys.argv)>1:
