@@ -84,21 +84,22 @@ if __name__ == "__main__":
 
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
     print("fitting with emcee...")
-    
-    # initialize walkers
-    pos = np.array(default_pos) + \
+
+    with Pool() as pool:    
+        # initialize walkers
+        pos = np.array(default_pos) + \
                     1e-4 * np.random.randn(nwalkers, len(parameters_to_fit))
-    nwalkers, ndim = pos.shape
+        nwalkers, ndim = pos.shape
 
-    # open file for saving steps
-    backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
-    backend.reset(nwalkers, ndim)
+        # open file for saving steps
+        backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
+        backend.reset(nwalkers, ndim)
 
-    #sample
-    sampler = emcee.EnsembleSampler(
-        nwalkers, ndim, lnprob, backend=backend #, args=(data,grids)
-    )
-    sampler.run_mcmc(pos, nsteps, progress=True);
+        #sample
+        sampler = emcee.EnsembleSampler(
+            nwalkers, ndim, lnprob, backend=backend, pool=pool #, args=(data,grids)
+              )
+        sampler.run_mcmc(pos, nsteps, progress=True);
 
     
     #~~~~~~~~~~~~~~~~~~~~~ post-process ~~~~~~~~~~~~~~~~~~~~~~~ #
