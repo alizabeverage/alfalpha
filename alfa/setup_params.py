@@ -1,4 +1,4 @@
-def setup_params(parameters_to_fit):
+def setup_params(parameters_to_fit=None):
     
     default_params = {'velz':0, 'sigma':200, 'logage':0.4, 'zH':0,
                      'feh':0, 'ah':0, 'ch':0, 'nh':0, 'nah':0, 'mgh':0, 'sih':0,
@@ -22,10 +22,14 @@ def setup_params(parameters_to_fit):
                     'nih':[-0.3,0.3], 'cuh':[-0.3,0.3], 'srh':[-0.3,0.3], 'bah':[-0.3,0.3], 
                     'euh':[-0.3,0.3]}
 
-    default_pos = [default_params[key] for key in parameters_to_fit]
-    priors = {key: priors_all[key] for key in parameters_to_fit}
+    if parameters_to_fit == None:
+        return default_params, priors_all
+ 
+    else:
+        default_pos = [default_params[key] for key in parameters_to_fit]
+        priors = {key: priors_all[key] for key in parameters_to_fit}
     
-    return default_pos, priors
+        return default_pos, priors
 
 
 def get_properties(theta,parameters_to_fit):
