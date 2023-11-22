@@ -22,7 +22,7 @@ def setup_params(parameters_to_fit=None):
                     'nih':[-0.3,0.3], 'cuh':[-0.3,0.3], 'srh':[-0.3,0.3], 'bah':[-0.3,0.3], 
                     'euh':[-0.3,0.3]}
 
-    if parameters_to_fit == None:
+    if parameters_to_fit is None:
         return default_params, priors_all
  
     else:
