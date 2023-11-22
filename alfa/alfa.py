@@ -12,7 +12,7 @@ from schwimmbad import MPIPool
 from setup_params import setup_params, get_properties
 import os, sys
 from utils import correct_abundance
-from process_outputs import plot_outputs
+from plot_outputs import plot_outputs
 
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']

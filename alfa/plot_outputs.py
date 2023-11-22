@@ -2,10 +2,10 @@ import emcee
 import matplotlib.pyplot as plt
 import corner
 import numpy as np
-from alfa.read_data import Data
-from alfa.grids import Grids
-from alfa.polynorm import polynorm
-from setup_params import get_properties
+#from alfa.read_data import Data
+#from alfa.grids import Grids
+#from alfa.polynorm import polynorm
+#from alfa.setup_params import get_properties
 import os
 
 ALFA_OUT = os.environ['ALFA_OUT']
