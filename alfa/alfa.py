@@ -12,6 +12,7 @@ from schwimmbad import MPIPool
 from setup_params import setup_params, get_properties
 import os, sys
 from utils import correct_abundance
+from process_outputs import plot_outputs
 
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
@@ -104,10 +105,10 @@ if __name__ == "__main__":
     
     #~~~~~~~~~~~~~~~~~~~~~ post-process ~~~~~~~~~~~~~~~~~~~~~~~ #
     
-    samples = sampler.get_chain(flat=False, thin=15,discard=nsteps-nsteps_save)
+    samples = sampler.get_chain(flat=False, thin=thin,discard=nsteps-nsteps_save)
     np.save(f"{ALFA_OUT}{filename}_mcmc.npy",samples)
 
-    flat_samples = sampler.get_chain(discard=nsteps-nsteps_save,flat=True, thin=15)
+    flat_samples = sampler.get_chain(discard=nsteps-nsteps_save,flat=True, thin=thin)
     # make summary file with abundances corrected
     dict_results = {}
     for i,param in enumerate(parameters_to_fit):
@@ -131,7 +132,8 @@ if __name__ == "__main__":
               float_format='%10.3f', sep=" ", 
               quoting=csv.QUOTE_NONE, escapechar=" ")
     
+    #~~~~~~~~~~~~~~~~~~~~~ make plots ~~~~~~~~~~~~~~~~~~~~~~~ #
 
-
+    plot_outputs(data,grids,parameters_to_fit,filename,reader=sampler,thin=thin,discard=nsteps-nsteps_save)
 
 
