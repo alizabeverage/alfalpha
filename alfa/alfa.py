@@ -18,6 +18,8 @@ from plot_outputs import plot_outputs
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 
+pool = Pool() # None
+
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 def lnlike(theta): #, data, grids):
@@ -53,7 +55,6 @@ if __name__ == "__main__":
     nsteps = 10000
     nsteps_save = 1000
     thin = 15
-    pool = None #Pool()
 
     # use command arguments to get filename
     if len(sys.argv)>1:
