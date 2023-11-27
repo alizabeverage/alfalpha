@@ -24,8 +24,6 @@ parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'ah', 'ch',
                 'nh', 'nah', 'mgh', 'sih', 'kh', 'cah', 'tih', 'vh', 
                 'crh']
 
-parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'mgh', 'cah']
-
 # emission lines, define wavelength range of interest
 parameters_to_fit+=list(np.unique(emline_strs[(wave_emlines<5600)&(wave_emlines>3800)]))
 parameters_to_fit+=['velz2','sigma2']
