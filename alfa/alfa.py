@@ -18,19 +18,6 @@ from plot_outputs import plot_outputs
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 
-# define which parameters to fit
-# you must have logage and zH
-parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'ah', 'ch', 
-                'nh', 'nah', 'mgh', 'sih', 'kh', 'cah', 'tih', 'vh', 
-                'crh']
-
-# emission lines, define wavelength range of interest
-parameters_to_fit+=list(np.unique(emline_strs[(wave_emlines<5600)&(wave_emlines>3800)]))
-parameters_to_fit+=['velz2','sigma2']
-
-# get the positions and priors of parameters_to_fit
-default_pos, priors = setup_params(parameters_to_fit)
-
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 def lnlike(theta): #, data, grids):
@@ -87,6 +74,20 @@ if __name__ == "__main__":
     # set up grid object
     print(f"Loading grids...")
     grids = Grids(inst_res=inst_res)
+
+    # define which parameters to fit
+    # you must have logage and zH
+    parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'ah', 'ch', 
+                    'nh', 'nah', 'mgh', 'sih', 'kh', 'cah', 'tih', 'vh', 
+                    'crh']
+    
+    # fit emission lines if HM 56163 or 23351
+    if '56163' in filename or '23351' in filename:
+        parameters_to_fit+=list(np.unique(emline_strs[(wave_emlines<5600)&(wave_emlines>3800)]))
+        parameters_to_fit+=['velz2','sigma2']
+
+    # get the positions and priors of parameters_to_fit
+    default_pos, priors = setup_params(parameters_to_fit)
     
 
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
