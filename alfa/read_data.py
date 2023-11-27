@@ -31,7 +31,7 @@ class Data():
         f.close()
         for line in lines[:50]:
             if '#' in line: 
-                x1 = float(line.split(' ')[1])
-                x2 = float(line.split(' ')[2])
+                x1 = float(line.split()[1])
+                x2 = float(line.split()[2])
                 self.fitting_regions.append([x1,x2])
         self.fitting_regions = 1e4*np.array(self.fitting_regions)

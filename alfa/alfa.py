@@ -18,8 +18,6 @@ from plot_outputs import plot_outputs
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 
-pool = Pool() # None
-
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 def lnlike(theta): #, data, grids):
@@ -94,21 +92,21 @@ if __name__ == "__main__":
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
     print("fitting with emcee...")
 
-    # with Pool() as pool:    
+    with Pool() as pool:    
         # initialize walkers
-    pos = np.array(default_pos) + \
+        pos = np.array(default_pos) + \
                 1e-4 * np.random.randn(nwalkers, len(parameters_to_fit))
-    nwalkers, ndim = pos.shape
+        nwalkers, ndim = pos.shape
 
-    # open file for saving steps
-    backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
-    backend.reset(nwalkers, ndim)
+        # open file for saving steps
+        backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
+        backend.reset(nwalkers, ndim)
 
-    #sample
-    sampler = emcee.EnsembleSampler(
-        nwalkers, ndim, lnprob, backend=backend, pool=pool #, args=(data,grids)
-          )
-    sampler.run_mcmc(pos, nsteps, progress=True);
+        #sample
+        sampler = emcee.EnsembleSampler(
+            nwalkers, ndim, lnprob, backend=backend, pool=pool #, args=(data,grids)
+              )
+        sampler.run_mcmc(pos, nsteps, progress=True);
 
     
     #~~~~~~~~~~~~~~~~~~~~~ post-process ~~~~~~~~~~~~~~~~~~~~~~~ #
