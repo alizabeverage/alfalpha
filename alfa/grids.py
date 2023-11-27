@@ -9,6 +9,22 @@ ckms = 2.998e5
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_INFILES = os.environ['ALFA_INFILES']
 
+wave_emlines = np.array([4102.89, 4341.69, 4862.71, 4960.30, 5008.24, 
+                         5203.05, 6549.86, 6564.61, 6585.27, 6718.29, 
+                         6732.67, 3727.10, 3729.86, 3751.22, 3771.70, 
+                         3798.99, 3836.49, 3890.17, 3971.20])
+emline_strs = np.array(['logemline_h','logemline_h','logemline_h', 
+                          'logemline_oiii','logemline_oiii','logemline_ni',
+                              'logemline_nii', 'logemline_h', 'logemline_nii', 
+                              'logemline_sii', 'logemline_sii', 'logemline_oii', 'logemline_oii', 
+                              'logemline_h', 'logemline_h', 'logemline_h', 
+                              'logemline_h', 'logemline_h', 'logemline_h'])
+emnormall = np.array([1./11.21, 1./6.16, 1./2.87, 1./3., 
+                           1., 1., 1./2.95, 
+                           1., 1., 1., 0.77, 
+                           1., 1.35, 1./65., 1./55., 1./45., 1./35., 
+                           1./25., 1./18.])
+
 class Grids():
     '''
     Initialize the grids object
@@ -96,8 +112,34 @@ class Grids():
         # smooth to desired sigma
         spec = smoothspec(wave_offset, spec,
                             inres=100,resolution=params['sigma'],outwave=outwave)
+
+        # add emission lines if logemline is one of the keys
+        if np.array(['logemline' in p for p in params.keys()]).sum()>0:
+            spec = self.add_emlines(spec,params)
     
         return spec
+
+
+    def add_emlines(self,spec,params):
+        # this way you only add the emission lines that are included in the 
+        # params dict
+        # if you enter this you must have 'velz2' and 'sigma2' also defined
+        for p,val in params.items():
+            if 'logemline' not in p:
+                continue
+            wave_emlines_tmp = wave_emlines[emline_strs == p]
+            emnormall_tmp = emnormall[emline_strs == p]
+
+            ve   = wave_emlines_tmp/(1+params['velz2']/ckms)
+            lsig = np.max([ve*params['sigma2']/ckms, np.ones(len(ve))],axis=0)  #min dlam=1.0A
+
+            for i in range(len(ve)):
+                spec+=10**val*emnormall_tmp[i]*np.exp(-(self.ssp.wave-ve[i])**2/lsig[i]**2/2.0)
+
+        return spec
+        
+
+        
 
     
 class Ssp():
