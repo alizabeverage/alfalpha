@@ -108,15 +108,16 @@ class Grids():
 
         # velocity offset
         wave_offset = self.ssp.wave/(1+params['velz']/ckms)
+
+        # add emission lines if logemline is one of the keys
+        if np.array(['logemline' in p for p in params.keys()]).sum()>0:
+            spec = self.add_emlines(spec,params)
         
         # smooth to desired sigma
         spec = smoothspec(wave_offset, spec,
                             inres=100,resolution=params['sigma'],outwave=outwave)
 
-        # add emission lines if logemline is one of the keys
-        if np.array(['logemline' in p for p in params.keys()]).sum()>0:
-            spec = self.add_emlines(spec,params)
-    
+        
         return spec
 
 
@@ -124,6 +125,7 @@ class Grids():
         # this way you only add the emission lines that are included in the 
         # params dict
         # if you enter this you must have 'velz2' and 'sigma2' also defined
+        # velz2 is in addition to velz
         for p,val in params.items():
             if 'logemline' not in p:
                 continue

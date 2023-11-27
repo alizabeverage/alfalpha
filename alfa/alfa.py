@@ -1,4 +1,4 @@
-from grids import Grids
+from grids import *
 from read_data import Data
 from polynorm import polynorm
 import numpy as np
@@ -23,6 +23,12 @@ ALFA_OUT = os.environ['ALFA_OUT']
 parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'ah', 'ch', 
                 'nh', 'nah', 'mgh', 'sih', 'kh', 'cah', 'tih', 'vh', 
                 'crh']
+
+parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'mgh', 'cah']
+
+# emission lines, define wavelength range of interest
+parameters_to_fit+=list(np.unique(emline_strs[(wave_emlines<5600)&(wave_emlines>3800)]))
+parameters_to_fit+=['velz2','sigma2']
 
 # get the positions and priors of parameters_to_fit
 default_pos, priors = setup_params(parameters_to_fit)
@@ -62,6 +68,7 @@ if __name__ == "__main__":
     nsteps = 10000
     nsteps_save = 1000
     thin = 15
+    pool = None #Pool()
 
     # use command arguments to get filename
     if len(sys.argv)>1:
@@ -87,21 +94,21 @@ if __name__ == "__main__":
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
     print("fitting with emcee...")
 
-    with Pool() as pool:    
+    # with Pool() as pool:    
         # initialize walkers
-        pos = np.array(default_pos) + \
-                    1e-4 * np.random.randn(nwalkers, len(parameters_to_fit))
-        nwalkers, ndim = pos.shape
+    pos = np.array(default_pos) + \
+                1e-4 * np.random.randn(nwalkers, len(parameters_to_fit))
+    nwalkers, ndim = pos.shape
 
-        # open file for saving steps
-        backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
-        backend.reset(nwalkers, ndim)
+    # open file for saving steps
+    backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
+    backend.reset(nwalkers, ndim)
 
-        #sample
-        sampler = emcee.EnsembleSampler(
-            nwalkers, ndim, lnprob, backend=backend, pool=pool #, args=(data,grids)
-              )
-        sampler.run_mcmc(pos, nsteps, progress=True);
+    #sample
+    sampler = emcee.EnsembleSampler(
+        nwalkers, ndim, lnprob, backend=backend, pool=pool #, args=(data,grids)
+          )
+    sampler.run_mcmc(pos, nsteps, progress=True);
 
     
     #~~~~~~~~~~~~~~~~~~~~~ post-process ~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -109,6 +116,11 @@ if __name__ == "__main__":
     samples = sampler.get_chain(flat=False, thin=thin,discard=nsteps-nsteps_save)
     np.save(f"{ALFA_OUT}{filename}_mcmc.npy",samples)
 
+    #~~~~~~~~~~~~~~~~~~~~~ make plots ~~~~~~~~~~~~~~~~~~~~~~~ #
+
+    plot_outputs(data,grids,parameters_to_fit,filename,reader=sampler,thin=thin,discard=nsteps-nsteps_save)
+
+    # correct abundances...
     flat_samples = sampler.get_chain(discard=nsteps-nsteps_save,flat=True, thin=thin)
     # make summary file with abundances corrected
     dict_results = {}
@@ -133,8 +145,6 @@ if __name__ == "__main__":
               float_format='%10.3f', sep=" ", 
               quoting=csv.QUOTE_NONE, escapechar=" ")
     
-    #~~~~~~~~~~~~~~~~~~~~~ make plots ~~~~~~~~~~~~~~~~~~~~~~~ #
-
-    plot_outputs(data,grids,parameters_to_fit,filename,reader=sampler,thin=thin,discard=nsteps-nsteps_save)
+    
 
 
