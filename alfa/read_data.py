@@ -4,12 +4,17 @@ import os
 ALFA_HOME = os.environ['ALFA_HOME']
 
 class Data():
-    def __init__(self,filename=None):
+    def __init__(self,filename=None,filename_exact=False):
         self.filename = filename
+        self.filename_exact = filename_exact
         if self.filename is None: 
             return
-            
-        tmp = np.array(pd.read_csv(f"{ALFA_HOME}indata/{self.filename}.dat",
+
+        if self.filename_exact:
+            tmp = np.array(pd.read_csv(f"{self.filename}.dat",
+                                       delim_whitespace=True, header=None, comment='#'))
+        else:
+            tmp = np.array(pd.read_csv(f"{ALFA_HOME}indata/{self.filename}.dat",
                                        delim_whitespace=True, header=None, comment='#'))
         self.wave = tmp[:,0]
         self.flux = tmp[:,1]
@@ -26,7 +31,11 @@ class Data():
 
 
     def get_fitting_regions(self):
-        f = open(f"{ALFA_HOME}indata/{self.filename}.dat",'r')
+        if self.filename_exact:
+            f = open(f"{self.filename}.dat",'r')
+        else:
+            f = open(f"{ALFA_HOME}indata/{self.filename}.dat",'r')
+        
         lines = f.readlines()
         f.close()
         for line in lines[:50]:
