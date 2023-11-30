@@ -95,7 +95,7 @@ if __name__ == "__main__":
     with Pool() as pool:    
         # initialize walkers
         pos = np.array(default_pos) + \
-                1e-4 * np.random.randn(nwalkers, len(parameters_to_fit))
+                1e-2 * np.random.randn(nwalkers, len(parameters_to_fit))
         nwalkers, ndim = pos.shape
 
         # open file for saving steps

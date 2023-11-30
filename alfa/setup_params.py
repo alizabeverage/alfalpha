@@ -16,7 +16,7 @@ def setup_params(parameters_to_fit=None):
                     'euh':[-0.3,0.3], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
                     'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[50,1000]}
-        
+    '''    
     # Heavy Metal -- limit age, extend mgh, feh, zh
     priors_all = {'velz':[-400,400], 'sigma':[100,500], 'logage':[-0.3,0.7], 'zH':[-1,0.5],
                     'feh':[-0.8,0.8], 'ah':[-0.3,0.3], 'ch':[-0.15,0.15], 
@@ -27,7 +27,8 @@ def setup_params(parameters_to_fit=None):
                     'euh':[-0.3,0.3], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
                     'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[50,1000]}
-    
+    '''
+
     if parameters_to_fit is None:
         return default_params, priors_all
  
