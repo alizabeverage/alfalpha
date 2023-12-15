@@ -17,6 +17,7 @@ from plot_outputs import plot_outputs
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
+ALFA_OUT = '/Users/alizabeverage/Software/alfalpha_testing/outfiles/'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
 
     # set up data object
     print(f"Loading {filename}...")
-    data = Data(filename)
+    data = Data(filename, filename_exact=True)
     
     # you still need to add wavelength dependent ires
     # for now, just take the average of the data
@@ -101,6 +102,7 @@ if __name__ == "__main__":
     nwalkers, ndim = pos.shape
 
     # open file for saving steps
+    filename = filename.split('/')[-1]
     backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
     backend.reset(nwalkers, ndim)
 
@@ -133,7 +135,7 @@ if __name__ == "__main__":
             sample = flat_samples[ind]
             
             params = get_properties(sample,parameters_to_fit)
-            mflux = g.get_model(params,outwave=data.wave)
+            mflux = grids.get_model(params,outwave=data.wave)
         
             #poly norm
             poly, mfluxnorm, data_r = polynorm(data, mflux,return_data=True)
@@ -141,10 +143,11 @@ if __name__ == "__main__":
             plt.plot(data.wave,mfluxnorm, 'C1')
             
         
-        plt.xlabel('Wavelength')
-        plt.ylabel('Flux')
+        plt.xlabel('Wavelength ($\mathring{\mathrm{A}}$)')
+        plt.ylabel('F$_\lambda$')
+        plt.tight_layout()
     
-        plt.savefig(f"{ALFA_OUT}{filename}_bestspec.jpeg")
+        plt.savefig(f"{ALFA_OUT}{filename}_bestspec.jpeg",dpi=200)
     
     
         # save outputs in summary file
@@ -167,9 +170,13 @@ if __name__ == "__main__":
         
         
         df = pd.DataFrame.from_dict(dict_results)
-        df.to_csv(f"{ALFA_OUT}{filename}.sum", 
-                  float_format='%10.3f', sep=" ", 
-                  quoting=csv.QUOTE_NONE, escapechar=" ")
+        np.savetxt(
+            f"{ALFA_OUT}{filename}.sum",
+            df.values,
+            fmt='%10.3f',
+            header=''.join([f'{col:10}' for col in df.columns]),
+            comments=''
+        )
     
     
 
