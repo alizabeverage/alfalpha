@@ -12,12 +12,29 @@ def remap_array(data, mapping=[0,1], vmax=None, vmin=None):
     return m*data+b
 
 
-def fit_poly(wave, flux, deg=7):
-    wave_remap = remap_array(wave,mapping=[-1,1])
-    p, coeff = C.fit(wave_remap,flux,deg,full=True)
-    poly = p(wave_remap)
-    return poly
+# def fit_poly(wave, flux, deg=7):
+#     wave_remap = remap_array(wave,mapping=[-1,1])
+#     p, coeff = C.fit(wave_remap,flux,deg,full=True)
+#     poly = p(wave_remap)
+#     return poly
 
+def wave_to_x(wavelength=None, mask=slice(None), **extras):
+        """Map unmasked wavelengths to the interval (-1, 1). Masked wavelengths may have x>1, x<-1
+
+        :param wavelength:
+            The input wavelengths.  ndarray of shape ``(nwave,)``
+
+        :param mask: optional
+            The mask.  slice or boolean array with ``True`` for unmasked elements.
+            The interval (-1, 1) will be defined only by unmasked wavelength points
+
+        :returns x:
+            The wavelength vector, remapped to the interval (-1, 1).
+            ndarray of same shape as  ``wavelength``
+        """
+        x = wavelength - (wavelength[mask]).min()
+        x = 2.0 * (x / (x[mask]).max()) - 1.0
+        return x
 
 
 def correct_abundance(zh,xh,element):
