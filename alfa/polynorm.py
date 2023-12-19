@@ -40,7 +40,7 @@ def polynorm(data_obj, model, return_data=False):
         # one degree for every 100 AA
         polydegree = math.ceil(np.diff(region)/100)
         
-        if polydegree>5: polydegree = 5
+        if polydegree>=15: polydegree = 15
             
         poly[s] = fit_poly(data_obj.wave[s], data_obj.flux[s], data_obj.err[s], 
                             data_obj.mask[s], model[s], order=polydegree)

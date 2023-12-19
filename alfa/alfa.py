@@ -9,7 +9,7 @@ import corner
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
 #from schwimmbad import MPIPool
-from setup_params import setup_params, get_properties
+from setup_params import setup_params, get_properties, setup_initial_position
 import os, sys
 from utils import correct_abundance
 from plot_outputs import plot_outputs
@@ -17,7 +17,7 @@ from plot_outputs import plot_outputs
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
-ALFA_OUT = '/Users/alizabeverage/Software/alfalpha_testing/outfiles/'
+ALFA_OUT = '/Users/alizabeverage/Software/alfalpha_testing/sdss/outfiles/'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -29,7 +29,12 @@ def lnlike(theta): #, data, grids):
     #poly norm
     poly, mfluxnorm = polynorm(data, mflux)
 
-    return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
+    if 'jitter' in parameters_to_fit:
+        # copied from alf
+        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2*params['jitter']**2) \
+                        + np.log(2*np.pi*data.err**2*params['jitter']**2))
+    else:
+        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
     
 def lnprior(theta):
     check = np.array([prio[0] < p < prio[1] for (p,prio) in zip(theta,priors.values())])
@@ -50,7 +55,7 @@ def lnprob(theta): #, data, grids):
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 1000
+    nsteps = 8000
     nsteps_save = 300
     thin = 1
     post_process = True
@@ -81,7 +86,14 @@ if __name__ == "__main__":
     #                 'nh', 'nah', 'mgh', 'sih', 'kh', 'cah', 'tih', 'vh', 
     #                 'crh']
 
-    parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'mgh', 'cah']
+    # parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'mgh', 'cah']
+    parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+                         'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
+                         'tih', 'vh', 'crh', 'mnh', 'coh', 'nih',
+                         'cuh', 'srh', 'bah', 'euh', 'teff', 'jitter']
+
+
+    np.random.uniform(0,1,(nwalkers,len(parameters_to_fit)))
     
     # fit emission lines if HM 56163 or 23351
     # if '56163' in filename or '23351' in filename:
@@ -97,8 +109,8 @@ if __name__ == "__main__":
 
     # with Pool() as pool:    
     # initialize walkers
-    pos = np.array(default_pos) + \
-            1e-2 * np.random.randn(nwalkers, len(parameters_to_fit))
+
+    pos = setup_initial_position(nwalkers,parameters_to_fit)
     nwalkers, ndim = pos.shape
 
     # open file for saving steps

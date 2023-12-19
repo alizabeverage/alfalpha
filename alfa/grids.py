@@ -103,6 +103,11 @@ class Grids():
                 
                 interp = getattr(self.rfn, key[:-1]+'_interp')
                 spec *= interp([params['logage'],params['zH'],value])
+
+            # vary Teff (special case - force use of the 13 Gyr model)
+            elif key == 'teff':
+                interp = getattr(self.rfn, 'teff_interp')
+                spec *= interp([np.log10(13),params['zH'],value])
         
         spec = spec[0]
 
@@ -272,6 +277,7 @@ class Rfn():
                                 getattr(self, e+'p')/self.solar])
                 range_ = [-0.3,0,0.3]
                 if e=='c': range_ = [-0.15,0,0.15]
+                if e=='teff': range_ = [-50.0,0,50.0]
                 
             elif e+'p' in self.rfn_cols and ~(e+'m' in self.rfn_cols):
                 p = np.array([self.solar/self.solar,
