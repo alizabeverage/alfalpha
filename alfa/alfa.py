@@ -6,7 +6,7 @@ import pandas as pd
 import csv
 import emcee
 import corner
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 import matplotlib.pyplot as plt
 #from schwimmbad import MPIPool
 from setup_params import setup_params, get_properties, setup_initial_position
@@ -14,39 +14,79 @@ import os, sys
 from utils import correct_abundance
 from plot_outputs import plot_outputs
 
+multip = True
+
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 ALFA_OUT = '/Users/alizabeverage/Software/alfalpha_testing/sdss/outfiles/'
 
+parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
+                     'tih', 'vh', 'crh', 'mnh', 'coh', 'nih',
+                     'cuh', 'srh', 'bah', 'euh', 'teff', 'jitter']
+
+default_pos, priors = setup_params(parameters_to_fit)
+
+ncpu = cpu_count()
+
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
-def lnlike(theta): #, data, grids):
-    # generate model according to theta
-    params = get_properties(theta,parameters_to_fit)
-    mflux = grids.get_model(params,outwave=data.wave)
-
-    #poly norm
-    poly, mfluxnorm = polynorm(data, mflux)
-
-    if 'jitter' in parameters_to_fit:
-        # copied from alf
-        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2*params['jitter']**2) \
-                        + np.log(2*np.pi*data.err**2*params['jitter']**2))
-    else:
-        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
+if multip:
+    def lnlike(theta, data, grids): # multiprocessing
+        # generate model according to theta
+        params = get_properties(theta,parameters_to_fit)
+        mflux = grids.get_model(params,outwave=data.wave)
     
-def lnprior(theta):
-    check = np.array([prio[0] < p < prio[1] for (p,prio) in zip(theta,priors.values())])
-    if False not in check:
-        return 1.0
-    return -np.inf
-
-def lnprob(theta): #, data, grids):
-    lp = lnprior(theta)
-    if not np.isfinite(lp):
+        #poly norm
+        poly, mfluxnorm = polynorm(data, mflux)
+    
+        if 'jitter' in parameters_to_fit:
+            # copied from alf
+            return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2*params['jitter']**2) \
+                            + np.log(2*np.pi*data.err**2*params['jitter']**2))
+        else:
+            return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
+        
+    def lnprior(theta):
+        check = np.array([prio[0] < p < prio[1] for (p,prio) in zip(theta,priors.values())])
+        if False not in check:
+            return 1.0
         return -np.inf
-    return lp*lnlike(theta) #, data, grids)
+    
+    def lnprob(theta, data, grids): # multiprocessing
+        lp = lnprior(theta)
+        if not np.isfinite(lp):
+            return -np.inf
+        return lp*lnlike(theta, data, grids) # multiprocessing
+
+else:
+    def lnlike(theta): # multiprocessing
+        # generate model according to theta
+        params = get_properties(theta,parameters_to_fit)
+        mflux = grids.get_model(params,outwave=data.wave)
+    
+        #poly norm
+        poly, mfluxnorm = polynorm(data, mflux)
+    
+        if 'jitter' in parameters_to_fit:
+            # copied from alf
+            return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2*params['jitter']**2) \
+                            + np.log(2*np.pi*data.err**2*params['jitter']**2))
+        else:
+            return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
+        
+    def lnprior(theta):
+        check = np.array([prio[0] < p < prio[1] for (p,prio) in zip(theta,priors.values())])
+        if False not in check:
+            return 1.0
+        return -np.inf
+    
+    def lnprob(theta): # multiprocessing
+        lp = lnprior(theta)
+        if not np.isfinite(lp):
+            return -np.inf
+        return lp*lnlike(theta) # multiprocessing
 
 
 
@@ -80,36 +120,20 @@ if __name__ == "__main__":
     print(f"Loading grids...")
     grids = Grids(inst_res=inst_res,kroupa_shortcut=False)
 
-    # define which parameters to fit
-    # you must have logage and zH
-    # parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'ah', 'ch', 
-    #                 'nh', 'nah', 'mgh', 'sih', 'kh', 'cah', 'tih', 'vh', 
-    #                 'crh']
 
-    # parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh', 'mgh', 'cah']
-    parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-                         'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
-                         'tih', 'vh', 'crh', 'mnh', 'coh', 'nih',
-                         'cuh', 'srh', 'bah', 'euh', 'teff', 'jitter']
-
-
-    np.random.uniform(0,1,(nwalkers,len(parameters_to_fit)))
-    
     # fit emission lines if HM 56163 or 23351
     # if '56163' in filename or '23351' in filename:
     #     parameters_to_fit+=list(np.unique(emline_strs[(wave_emlines<5600)&(wave_emlines>3800)]))
     #     parameters_to_fit+=['velz2','sigma2']
 
     # get the positions and priors of parameters_to_fit
-    default_pos, priors = setup_params(parameters_to_fit)
+    # default_pos, priors = setup_params(parameters_to_fit)
     
 
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
     print("fitting with emcee...")
 
-    # with Pool() as pool:    
     # initialize walkers
-
     pos = setup_initial_position(nwalkers,parameters_to_fit)
     nwalkers, ndim = pos.shape
 
@@ -118,11 +142,21 @@ if __name__ == "__main__":
     backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
     backend.reset(nwalkers, ndim)
 
-    #sample
-    sampler = emcee.EnsembleSampler(
-        nwalkers, ndim, lnprob, backend=backend#, pool=pool #, args=(data,grids)
-          )
-    sampler.run_mcmc(pos, nsteps, progress=True);
+    if multip:
+        with Pool() as pool:
+            #sample
+            sampler = emcee.EnsembleSampler(
+                nwalkers, ndim, lnprob, backend=backend, pool=pool, args=(data,grids) 
+                  )
+            sampler.run_mcmc(pos, nsteps, progress=True);
+
+    else:
+        with Pool() as pool: 
+            #sample
+            sampler = emcee.EnsembleSampler(
+                nwalkers, ndim, lnprob, backend=backend 
+                  )
+            sampler.run_mcmc(pos, nsteps, progress=True);
 
     # #~~~~~~~~~~~~~~~~~~~~~ post-process ~~~~~~~~~~~~~~~~~~~~~~~ #
 
