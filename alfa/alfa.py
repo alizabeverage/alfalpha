@@ -14,17 +14,20 @@ import os, sys
 from utils import correct_abundance
 from plot_outputs import plot_outputs
 
-multip = True
+multip = False
 
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
-ALFA_OUT = '/Users/alizabeverage/Software/alfalpha_testing/sdss/outfiles/'
+ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
 
 parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
                      'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
                      'tih', 'vh', 'crh', 'mnh', 'coh', 'nih',
                      'cuh', 'srh', 'bah', 'euh', 'teff', 'jitter']
+
+parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+                    'mgh','jitter']
 
 default_pos, priors = setup_params(parameters_to_fit)
 
@@ -95,7 +98,7 @@ else:
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 8000
+    nsteps = 4000
     nsteps_save = 300
     thin = 1
     post_process = True
