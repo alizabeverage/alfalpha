@@ -1,5 +1,5 @@
 import numpy as np
-
+#
 def setup_params(parameters_to_fit=None):
     
     default_params = {'velz':0, 'sigma':200, 'logage':0.4, 'zH':0,
