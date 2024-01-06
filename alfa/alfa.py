@@ -19,7 +19,7 @@ multip = False
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
-ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
+#ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
 
 parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
                      'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
@@ -32,7 +32,7 @@ parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 default_pos, priors = setup_params(parameters_to_fit)
 
 ncpu = cpu_count()
-
+print(ncpu)
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 if multip:
@@ -98,7 +98,7 @@ else:
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 4000
+    nsteps = 1000
     nsteps_save = 300
     thin = 1
     post_process = True
