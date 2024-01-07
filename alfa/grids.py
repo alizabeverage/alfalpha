@@ -51,42 +51,78 @@ class Grids():
     Eventually: add nuisance parameters (skylines, atm transmission, hot stars, M7III stars)
     '''
     
-    def __init__(self,kroupa_shortcut=True,inst_res=0):
+    def __init__(self,kroupa_shortcut=True,inst_res=0,inst_res_wave=None):
         self.ssp = Ssp(kroupa_shortcut=kroupa_shortcut)
         self.rfn = Rfn()
 
         # smooth all grids to instrumental resolution
         self.model_res = 100 # km/s
         self.inst_res = inst_res
-        self.out_res = np.sqrt(self.inst_res**2+self.model_res**2)
-        print(f"Smoothing grids to instrumental resolution = {self.inst_res:.1f} km/s")
+        self.inst_res_wave = inst_res_wave
+
+        # interpolate instrumental resolution for entire wavelength grid
+        # use min/max inst_res around targetted wavelength range
+        if np.size(inst_res)>1:
+            assert type(inst_res_wave) == np.ndarray
+            assert np.size(inst_res) == np.size(inst_res_wave)
+            self.inst_res = np.interp(self.ssp.wave,inst_res_wave,self.inst_res,
+                             left=np.min(self.inst_res),right=np.max(self.inst_res))
+
+            print(f"Smoothing grids to wave dependent instrumental resolution")
+        else:
+            print(f"Smoothing grids to instrumental resolution = {self.inst_res:.1f} km/s")
+        
         self.smooth_to_inst()
 
     def smooth_to_inst(self):
         '''
-        Smooth the model grids to the instrumental resolution
+        Smooth the model grids to the instrumental resolution.
+        
+        If the instrumental resolution is wavelength dependent, 
+            you must have a wavelength array defined (self.inst_res_wave)
+            corresponding to the inst_res variable
 
-        Still: figure out how to do wavelength dependent instrumental resolution smoothing
+        self.inst_res must be in km/s (this is sigma not FWHM)
+        If it is wavelength dependent, I have to convert to \delta\lambda
+            for the smoothing function to work. I do this below...
+            
         '''
 
         # don't smooth if instrumental resolution is 0
-        if self.inst_res ==0: 
-            return
+        if np.size(self.inst_res)==1:
+            if self.inst_res==0: 
+                return
+            else:
+                smoothtype = 'vel'
+                resolution = self.inst_res
+            
+        # don't do wavelength dependent smoothing unless you really need it
+        elif np.max(self.inst_res)-np.min(self.inst_res) < 10:
+            smoothtype = 'vel'
+            resolution = np.median(self.inst_res)
+
+        # wavelength dependent smoothing
+        # resolution variable converted to \delta \lambda
+        else:
+            smoothtype = 'lsf'
+            resolution = self.inst_res*self.ssp.wave/ckms
 
         # smooth ssp grid to instrumental resolution
         for j in range(len(self.ssp.agegrid)):
             for k in range(len(self.ssp.logzgrid)):
                 self.ssp.ssp_grid[:,j,k] = smoothspec(self.ssp.wave,
                                                         self.ssp.ssp_grid[:,j,k],
-                                                        inres=self.model_res,resolution=self.out_res)
+                                                      resolution=resolution,
+                                                     smoothtype=smoothtype)
 
         # smooth rfn grid to instrumental resolution (loop through elements)
         for col in self.rfn.rfn_cols_use:
             tmp = getattr(self.rfn,col)
             for j in range(len(self.rfn.agegrid)):
                 for k in range(len(self.rfn.logzgrid)):
-                    tmp[:,j,k] = smoothspec(self.rfn.wave, tmp[:,j,k],
-                                                        inres=self.model_res,resolution=self.out_res)
+                    tmp[:,j,k] = smoothspec(self.rfn.wave, tmp[:,j,k], 
+                                            resolution=resolution,
+                                           smoothtype=smoothtype)
             setattr(self.rfn,col,tmp)
 
     
