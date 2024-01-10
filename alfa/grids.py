@@ -129,7 +129,7 @@ class Grids():
     def get_model(self, params, outwave=None):   
 
         # get SSP corresopnding to age and Z
-        spec = self.ssp.ssp_interp([params['logage'],params['zH']])
+        spec = 10**self.ssp.ssp_interp([params['logage'],params['zH']])
         
         # add rfns corresponding to age and Z
         for key, value in params.items():
@@ -237,8 +237,11 @@ class Ssp():
 
 
     def set_up_interpolator(self):
+        # Here you take the log of the grid before interpolating!!
+        # Interpolate in log-space!! 
+        # This was an annoying bug.
         self.ssp_interp = RegularGridInterpolator((self.logagegrid, self.logzgrid), 
-                        np.transpose(self.ssp_grid, (1,2,0)), 
+                        np.transpose(np.log10(self.ssp_grid), (1,2,0)), 
                     method='linear', bounds_error=False, fill_value=None)
 
 

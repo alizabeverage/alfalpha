@@ -29,10 +29,15 @@ parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
                     'mgh','jitter']
 
+# JWST
+parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+                     'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
+                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
+                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2']
+
 default_pos, priors = setup_params(parameters_to_fit)
 
 ncpu = cpu_count()
-print(ncpu)
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 if multip:
@@ -98,8 +103,8 @@ else:
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 1000
-    nsteps_save = 300
+    nsteps = 8000
+    nsteps_save = 1000
     thin = 1
     post_process = True
 
@@ -114,14 +119,10 @@ if __name__ == "__main__":
     # set up data object
     print(f"Loading {filename}...")
     data = Data(filename, filename_exact=True)
-    
-    # you still need to add wavelength dependent ires
-    # for now, just take the average of the data
-    inst_res = np.average(data.ires) 
 
     # set up grid object
     print(f"Loading grids...")
-    grids = Grids(inst_res=inst_res,kroupa_shortcut=False)
+    grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
 
 
     # fit emission lines if HM 56163 or 23351
@@ -202,6 +203,9 @@ if __name__ == "__main__":
         # save outputs in summary file
         parameters_to_fit = np.array(parameters_to_fit)
         dict_results = {}
+        # define Fe for retrieving [X/Fe]
+        Fe = correct_abundance(flat_samples[:,parameters_to_fit=='zH'].ravel(),
+                                         flat_samples[:,parameters_to_fit=='feh'],'feh')
         for i,param in enumerate(parameters_to_fit):
             dict_results[param+'16'] = [np.percentile(flat_samples[:,i],16)]
             dict_results[param+'50'] = [np.median(flat_samples[:,i])]
@@ -216,6 +220,11 @@ if __name__ == "__main__":
                 dict_results[param_st+'16'] = [np.percentile(dist,16)]
                 dict_results[param_st+'50'] = [np.median(dist)]
                 dict_results[param_st+'64'] = [np.percentile(dist,64)]
+
+                param_st = '['+param[:-1].capitalize()+'/Fe]'
+                dict_results[param_st+'16'] = [np.percentile(dist-Fe,16)]
+                dict_results[param_st+'50'] = [np.median(dist-Fe)]
+                dict_results[param_st+'64'] = [np.percentile(dist-Fe,64)]
         
         
         df = pd.DataFrame.from_dict(dict_results)
