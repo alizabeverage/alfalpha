@@ -29,12 +29,6 @@ parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
                     'mgh','jitter']
 
-# JWST
-parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-                     'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
-                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
-                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2']
-
 default_pos, priors = setup_params(parameters_to_fit)
 
 ncpu = cpu_count()
@@ -198,7 +192,7 @@ if __name__ == "__main__":
         plt.tight_layout()
     
         plt.savefig(f"{ALFA_OUT}{filename}_bestspec.jpeg",dpi=200)
-    
+        
     
         # save outputs in summary file
         parameters_to_fit = np.array(parameters_to_fit)
