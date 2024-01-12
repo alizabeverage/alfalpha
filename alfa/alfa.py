@@ -220,12 +220,12 @@ if __name__ == "__main__":
                 param_st = '['+param[:-1].capitalize()+'/H]'
                 dict_results[param_st+'16'] = [np.percentile(dist,16)]
                 dict_results[param_st+'50'] = [np.median(dist)]
-                dict_results[param_st+'64'] = [np.percentile(dist,64)]
+                dict_results[param_st+'84'] = [np.percentile(dist,64)]
 
                 param_st = '['+param[:-1].capitalize()+'/Fe]'
                 dict_results[param_st+'16'] = [np.percentile(dist-Fe,16)]
                 dict_results[param_st+'50'] = [np.median(dist-Fe)]
-                dict_results[param_st+'64'] = [np.percentile(dist-Fe,64)]
+                dict_results[param_st+'84'] = [np.percentile(dist-Fe,64)]
         
         
         df = pd.DataFrame.from_dict(dict_results)
@@ -233,7 +233,7 @@ if __name__ == "__main__":
             f"{ALFA_OUT}{filename}.sum",
             df.values,
             fmt='%10.3f',
-            header=''.join([f'{col:10}' for col in df.columns]),
+            header=''.join([f'{col:20}' for col in df.columns]),
             comments=''
         )
     
