@@ -21,13 +21,20 @@ ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 #ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
 
-parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
-                     'tih', 'vh', 'crh', 'mnh', 'coh', 'nih',
-                     'cuh', 'srh', 'bah', 'euh', 'teff', 'jitter']
+#parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+#                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
+#                     'tih', 'vh', 'crh', 'mnh', 'coh', 'nih',
+#                     'cuh', 'srh', 'bah', 'euh', 'teff', 'jitter']
 
-parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-                    'mgh','jitter']
+
+
+# parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+#                      'mgh','jitter']
+#
+parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
+                     'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
+                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
+                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
 
 default_pos, priors = setup_params(parameters_to_fit)
 
@@ -98,7 +105,7 @@ else:
 if __name__ == "__main__":  
     nwalkers = 256
     nsteps = 8000
-    nsteps_save = 1000
+    nsteps_save = 500
     thin = 1
     post_process = True
 
@@ -199,7 +206,7 @@ if __name__ == "__main__":
         dict_results = {}
         # define Fe for retrieving [X/Fe]
         Fe = correct_abundance(flat_samples[:,parameters_to_fit=='zH'].ravel(),
-                                         flat_samples[:,parameters_to_fit=='feh'],'feh')
+                                         flat_samples[:,parameters_to_fit=='feh'].ravel(),'feh')
         for i,param in enumerate(parameters_to_fit):
             dict_results[param+'16'] = [np.percentile(flat_samples[:,i],16)]
             dict_results[param+'50'] = [np.median(flat_samples[:,i])]
@@ -209,7 +216,7 @@ if __name__ == "__main__":
                                   'kh','cah','tih','vh','crh','mnh','coh',
                                   'nih','cuh','srh','bah','euh']:
                 dist = correct_abundance(flat_samples[:,parameters_to_fit=='zH'].ravel(),
-                                         flat_samples[:,i],param)
+                                         flat_samples[:,i].ravel(),param)
                 param_st = '['+param[:-1].capitalize()+'/H]'
                 dict_results[param_st+'16'] = [np.percentile(dist,16)]
                 dict_results[param_st+'50'] = [np.median(dist)]
