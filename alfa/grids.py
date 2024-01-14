@@ -189,7 +189,7 @@ class Ssp():
     def __init__(self, kroupa_shortcut=True):            
         self.agegrid = np.array([1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.5])
         self.logagegrid = np.log10(self.agegrid)
-        self.logzgrid = np.array([-1.5, -1.0, -0.5, 0.0, 0.2])
+        self.logzgrid = np.array([-1.5, -1.0, -0.5, 0.0, 0.25])
         self.get_kroupa_index()
         self.nstart = 99 # 0.36 um
         self.nend   = 5830 # 1.1um
