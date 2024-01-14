@@ -22,7 +22,7 @@ def setup_params(parameters_to_fit=None):
     #                 'jitter':[0.1,10]}
     '''    
     # Heavy Metal -- limit age, extend mgh, feh, zh
-    priors_all = {'velz':[-500,500], 'sigma':[100,500], 'logage':[-0.1,0.7], 'zH':[-1.5,0.5],
+    priors_all = {'velz':[-500,500], 'sigma':[100,500], 'logage':[-0.1,0.7], 'zH':[-1.5,0.25],
                     'feh':[-0.8,0.8], 'ah':[-0.3,0.3], 'ch':[-0.15,0.15], 
                     'nh':[-0.3,0.3], 'nah':[-0.3,0.3], 'mgh':[-0.8,0.8], 'sih':[-0.3,0.3],
                     'kh':[-0.3,0.3], 'cah':[-0.3,0.3], 'tih':[-0.3,0.3], 
