@@ -104,7 +104,7 @@ else:
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 14000
+    nsteps = 8000
     nsteps_save = 500
     thin = 1
     post_process = True
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         for i,param in enumerate(parameters_to_fit):
             dict_results[param+'16'] = [np.percentile(flat_samples[:,i],16)]
             dict_results[param+'50'] = [np.median(flat_samples[:,i])]
-            dict_results[param+'84'] = [np.percentile(flat_samples[:,i],64)]
+            dict_results[param+'84'] = [np.percentile(flat_samples[:,i],84)]
         
             if param in ['feh','ah','ch','nh','nah','mgh','sih',
                                   'kh','cah','tih','vh','crh','mnh','coh',
@@ -220,12 +220,12 @@ if __name__ == "__main__":
                 param_st = '['+param[:-1].capitalize()+'/H]'
                 dict_results[param_st+'16'] = [np.percentile(dist,16)]
                 dict_results[param_st+'50'] = [np.median(dist)]
-                dict_results[param_st+'84'] = [np.percentile(dist,64)]
+                dict_results[param_st+'84'] = [np.percentile(dist,84)]
 
                 param_st = '['+param[:-1].capitalize()+'/Fe]'
                 dict_results[param_st+'16'] = [np.percentile(dist-Fe,16)]
                 dict_results[param_st+'50'] = [np.median(dist-Fe)]
-                dict_results[param_st+'84'] = [np.percentile(dist-Fe,64)]
+                dict_results[param_st+'84'] = [np.percentile(dist-Fe,84)]
         
         
         df = pd.DataFrame.from_dict(dict_results)
