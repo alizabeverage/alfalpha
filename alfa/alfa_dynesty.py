@@ -103,7 +103,7 @@ if __name__ == "__main__":
     dsampler = DynamicNestedSampler(loglikelihood_dynesty, prior_transform, len(parameters_to_fit))
 
     t0 = time()
-    dsampler.run_nested(checkpoint_file=f'{ALFA_OUT}{filename}.save')
+    dsampler.run_nested()
     t1 = time()
     
     timedynesty = (t1-t0)
