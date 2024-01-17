@@ -9,17 +9,17 @@ def setup_params(parameters_to_fit=None):
                     'logemline_h':-4, 'logemline_ni':-4, 'logemline_nii':-4, 'logemline_oii':-4,
                    'logemline_oiii':-4, 'logemline_sii':-4, 'velz2':0, 'sigma2':200,'teff':0,
                      'jitter':1}
-    '''
-    # priors_all = {'velz':[-200,200], 'sigma':[100,500], 'logage':[-0.1,1.2], 'zH':[-1.5,0.2],
-    #                 'feh':[-0.3,0.3], 'ah':[-0.3,0.3], 'ch':[-0.15,0.15], 
-    #                 'nh':[-0.3,0.3], 'nah':[-0.3,0.3], 'mgh':[-0.3,0.3], 'sih':[-0.3,0.3],
-    #                 'kh':[-0.3,0.3], 'cah':[-0.3,0.3], 'tih':[-0.3,0.3], 
-    #                 'vh':[-0.3,0.3], 'crh':[-0.3,0.3], 'mnh':[-0.3,0.3], 'coh':[-0.3,0.3],
-    #                 'nih':[-0.3,0.3], 'cuh':[-0.3,0.3], 'srh':[-0.3,0.3], 'bah':[-0.3,0.3], 
-    #                 'euh':[-0.3,0.3], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
-    #                 'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
-    #                 'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[50,1000],'teff':[-80,80],
-    #                 'jitter':[0.1,10]}
+    
+    priors_all = {'velz':[-200,200], 'sigma':[100,500], 'logage':[-0.1,1.2], 'zH':[-1.5,0.2],
+                    'feh':[-0.3,0.3], 'ah':[-0.3,0.3], 'ch':[-0.15,0.15], 
+                    'nh':[-0.3,0.3], 'nah':[-0.3,0.3], 'mgh':[-0.3,0.3], 'sih':[-0.3,0.3],
+                    'kh':[-0.3,0.3], 'cah':[-0.3,0.3], 'tih':[-0.3,0.3], 
+                    'vh':[-0.3,0.3], 'crh':[-0.3,0.3], 'mnh':[-0.3,0.3], 'coh':[-0.3,0.3],
+                    'nih':[-0.3,0.3], 'cuh':[-0.3,0.3], 'srh':[-0.3,0.3], 'bah':[-0.3,0.3], 
+                    'euh':[-0.3,0.3], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
+                    'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
+                    'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[50,1000],'teff':[-80,80],
+                    'jitter':[0.1,10]}
     '''    
     # Heavy Metal -- limit age, extend mgh, feh, zh
     priors_all = {'velz':[-500,500], 'sigma':[100,500], 'logage':[-0.1,0.7], 'zH':[-1.5,0.25],
@@ -32,7 +32,7 @@ def setup_params(parameters_to_fit=None):
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
                     'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[0,1000],'teff':[-50,50],
                     'jitter':[0.1,10]}
-  
+    '''
 
     if parameters_to_fit is None:
         return default_params, priors_all

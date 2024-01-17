@@ -28,13 +28,13 @@ ALFA_OUT = os.environ['ALFA_OUT']
 
 
 
-# parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-#                      'mgh','jitter']
-#
-parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
-                     'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
-                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
-                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
+parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+                     'mgh']
+
+# parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
+#                      'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
+#                      'tih', 'vh', 'crh','teff','jitter','logemline_h', 
+#                      'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
 
 default_pos, priors = setup_params(parameters_to_fit)
 
@@ -104,7 +104,7 @@ else:
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 8000
+    nsteps = 2500
     nsteps_save = 500
     thin = 1
     post_process = True
