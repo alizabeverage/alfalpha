@@ -30,7 +30,7 @@ def setup_params(parameters_to_fit=None):
                     'nih':[-0.3,0.3], 'cuh':[-0.3,0.3], 'srh':[-0.3,0.3], 'bah':[-0.3,0.3], 
                     'euh':[-0.3,0.3], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
-                    'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[0,1000],'teff':[-80,80],
+                    'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[0,1000],'teff':[-50,50],
                     'jitter':[0.1,10]}
   
 
@@ -56,7 +56,7 @@ def setup_initial_position(nwalkers,parameters_to_fit):
                     'nih':[-0.2,0.2], 'cuh':[-0.2,0.2], 'srh':[-0.2,0.2], 'bah':[-0.2,0.2], 
                     'euh':[-0.2,0.2], 'logemline_h':[-2,0.2], 'logemline_ni':[-2,0.2], 
                     'logemline_nii':[-2,0.2], 'logemline_oii':[-2,0.2], 'logemline_oiii':[-2,0.2],
-                    'logemline_sii':[-2,0.2], 'velz2':[-5,5], 'sigma2':[200,300],'teff':[-40,40],
+                    'logemline_sii':[-2,0.2], 'velz2':[-5,5], 'sigma2':[200,300],'teff':[-20,20],
                     'jitter':[0.7,1.3]}
 
     for i,param in enumerate(parameters_to_fit):
