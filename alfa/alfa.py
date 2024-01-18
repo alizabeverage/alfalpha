@@ -104,8 +104,8 @@ else:
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 2500
-    nsteps_save = 500
+    nsteps = 400
+    nsteps_save = 100
     thin = 1
     post_process = True
 

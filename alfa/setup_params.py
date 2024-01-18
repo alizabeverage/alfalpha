@@ -48,7 +48,7 @@ def setup_initial_position(nwalkers,parameters_to_fit):
     pos = np.random.uniform(0,1,(nwalkers,len(parameters_to_fit)))
 
     # starting positions.... 
-    init_pos = {'velz':[-5,5], 'sigma':[200,300], 'logage':[0.2,0.6], 'zH':[-0.3,0.1],
+    init_pos = {'velz':[-5,5], 'sigma':[200,300], 'logage':[0.4,1.0], 'zH':[-0.8,0.1],
                     'feh':[-0.2,0.2], 'ah':[-0.2,0.2], 'ch':[-0.15,0.15], 
                     'nh':[-0.2,0.2], 'nah':[-0.2,0.2], 'mgh':[-0.2,0.2], 'sih':[-0.2,0.2],
                     'kh':[-0.2,0.2], 'cah':[-0.2,0.2], 'tih':[-0.2,0.2], 
