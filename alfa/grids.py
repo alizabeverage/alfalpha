@@ -73,6 +73,8 @@ class Grids():
             print(f"Smoothing grids to instrumental resolution = {self.inst_res:.1f} km/s")
         
         self.smooth_to_inst()
+        self.ssp.set_up_interpolator()
+        self.rfn.set_up_interpolators()
 
     def smooth_to_inst(self):
         '''
@@ -203,7 +205,6 @@ class Ssp():
         else:
             self.populate_grid() #makes self.empirical_spectra
 
-        self.set_up_interpolator()
 
     def get_kroupa_index(self):
         nimfoff = 2
@@ -272,7 +273,7 @@ class Rfn():
             self.__setattr__(col, np.copy(grid_arr))
         
         self.get_response_spectra()
-        self.set_up_interpolators()
+        # self.set_up_interpolators()
             
     def get_response_spectra(self):
         '''
