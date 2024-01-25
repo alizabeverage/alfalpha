@@ -1,4 +1,4 @@
-from utils import wave_to_x
+from .utils import wave_to_x
 import numpy as np
 import math
 from numpy.polynomial.chebyshev import chebval, chebvander
