@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from smoothing import smoothspec
+from .smoothing import smoothspec
 from scipy.interpolate import RegularGridInterpolator
 import os
 
