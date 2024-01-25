@@ -33,7 +33,7 @@ ALFA_OUT = os.environ['ALFA_OUT']
 
 parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
                      'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
-                     'tih', 'vh', 'crh','teff','logemline_h', 
+                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
                      'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
 
 default_pos, priors = setup_params(parameters_to_fit)
