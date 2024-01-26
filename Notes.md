@@ -33,3 +33,6 @@ plt.plot(g.ssp.wave[s], g.ssp.ssp_grid[s,2,3]+0.2)
 
 ```
 This will install package: python3 -m build
+
+Follow this:
+https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/
