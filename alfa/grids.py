@@ -98,10 +98,10 @@ class Grids():
                 smoothtype = 'vel'
                 resolution = self.inst_res
             
-        # don't do wavelength dependent smoothing unless you really need it
-        elif np.max(self.inst_res)-np.min(self.inst_res) < 10:
-            smoothtype = 'vel'
-            resolution = np.median(self.inst_res)
+        # # don't do wavelength dependent smoothing unless you really need it
+        # elif np.max(self.inst_res)-np.min(self.inst_res) < 10:
+        #     smoothtype = 'vel'
+        #     resolution = np.median(self.inst_res)
 
         # wavelength dependent smoothing
         # resolution variable converted to \delta \lambda
