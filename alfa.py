@@ -20,7 +20,7 @@ multip = False
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 #ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
-ALFA_OUT = '/Users/alizabeverage/Research/SUSPENSE/'
+ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
 
 #parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
@@ -32,14 +32,18 @@ ALFA_OUT = '/Users/alizabeverage/Research/SUSPENSE/'
 # parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 #                      'mgh']
 
-#parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
+# parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
 #                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
 #                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
 
-parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH',
-                     'jitter','logemline_h',
-                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
+parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
+                    'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
+                    'tih', 'vh', 'crh','teff','jitter'])
+
+# parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH',
+#                      'jitter','logemline_h',
+#                      'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
 
 default_pos, priors = setup_params(parameters_to_fit)
 
@@ -108,8 +112,8 @@ else:
 # ~~~~~~~~~~~~~~~~~~~~~~~ Run fitting tool ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 if __name__ == "__main__":  
-    nwalkers = 128
-    nsteps = 2000
+    nwalkers = 256
+    nsteps = 8000
     nsteps_save = 500
     thin = 1
     post_process = True
