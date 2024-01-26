@@ -20,7 +20,7 @@ multip = False
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 #ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
-ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
+ALFA_OUT = '/Users/alizabeverage/Research/SUSPENSE/'
 
 #parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',

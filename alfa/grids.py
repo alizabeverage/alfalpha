@@ -149,18 +149,20 @@ class Grids():
         
         spec = spec[0]
 
-        # velocity offset
-        wave_offset = self.ssp.wave/(1+params['velz']/ckms)
-
         # add emission lines if logemline is one of the keys
         if np.array(['logemline' in p for p in params.keys()]).sum()>0:
             spec = self.add_emlines(spec,params)
-        
-        # smooth to desired sigma
-        spec = smoothspec(wave_offset, spec,
-                            inres=100,resolution=params['sigma'],outwave=outwave)
 
-        
+        # smooth to desired sigma
+        spec = smoothspec(self.ssp.wave, spec,
+                            inres=100,resolution=params['sigma'])
+
+        # redshift the model and interpolate to data wavelength
+        oneplusz = (1+params['velz']/ckms)
+
+        spec = np.interp(outwave, self.ssp.wave*oneplusz, spec)
+
+    
         return spec
 
 
@@ -251,7 +253,7 @@ class Rfn():
     def __init__(self):
         self.agegrid = np.array([1,3,5,9,13])
         self.logagegrid = np.log10(self.agegrid)
-        self.logzgrid = np.array([-1.5, -1.0, -0.5, 0.0, 0.2])
+        self.logzgrid = np.array([-1.5, -1.0, -0.5, 0.0, 0.25])
         self.nstart = 99 # 0.36 um
         self.nend   = 5830 # 1.1um
         
@@ -285,7 +287,7 @@ class Rfn():
                 else: mp = 'p'
                 # Replace the [Z/H]=+0.2 models with the +0.0 models
                 # -- as the former are broken
-                if z==0.2: z=0.0 
+                if z==0.25: z=0.0 
                 filename = f"{ALFA_INFILES}/atlas_ssp_t{t:02}"\
                                     f"_Z{mp}{np.abs(z):.1f}.abund.krpa.s100"
                 tmp = np.array(pd.read_csv(filename, delim_whitespace=True, header=None, comment='#'))
