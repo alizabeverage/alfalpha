@@ -20,7 +20,7 @@ multip = False
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
 #ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
-ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
+#ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
 
 #parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
@@ -113,8 +113,8 @@ else:
 
 if __name__ == "__main__":  
     nwalkers = 256
-    nsteps = 8000
-    nsteps_save = 500
+    nsteps = 6000
+    nsteps_save = 200
     thin = 1
     post_process = True
 
