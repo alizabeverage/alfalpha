@@ -8,16 +8,9 @@ class Data():
         self.filename = filename
         self.filename_exact = filename_exact
         if self.filename is None: 
-            self.wave = None
-            self.flux = None
-            self.err = None
-            self.mask = None
-            self.ires = None
-            self.fitting_regions = None
-            
             return
 
-        elif self.filename_exact:
+        if self.filename_exact:
             tmp = np.array(pd.read_csv(f"{self.filename}.dat",
                                        delim_whitespace=True, header=None, comment='#'))
         else:

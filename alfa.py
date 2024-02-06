@@ -19,7 +19,7 @@ multip = False
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
-#ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/smooth_burst/results/'
+ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/results_test/'
 #ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
 
 #parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
@@ -29,17 +29,17 @@ ALFA_OUT = os.environ['ALFA_OUT']
 
 
 
-# parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-#                      'mgh']
+parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+                     'mgh']
 
 # parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
 #                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
 #                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
 
-parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
-                    'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
-                    'tih', 'vh', 'crh','teff','jitter'])
+# parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
+#                     'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
+#                     'tih', 'vh', 'crh','teff','jitter'])
 
 # parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH',
 #                      'jitter','logemline_h',
@@ -112,9 +112,9 @@ else:
 # ~~~~~~~~~~~~~~~~~~~~~~~ Run fitting tool ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 if __name__ == "__main__":  
-    nwalkers = 256
-    nsteps = 6000
-    nsteps_save = 200
+    nwalkers = 128
+    nsteps = 600
+    nsteps_save = 100
     thin = 1
     post_process = True
 
