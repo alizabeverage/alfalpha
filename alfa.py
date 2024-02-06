@@ -148,7 +148,7 @@ if __name__ == "__main__":
     bounds = list(prior.values())  
 
     # Run differential evolution optimization
-    result = differential_evolution(diff_ev_objective_function, bounds)
+    result = differential_evolution(diff_ev_objective_function, bounds,disp=False,updating='deferred')
     
     diff_ev_result = get_properties(result.x,diff_ev_parameters)
     print(f"Differential evolution result: {diff_ev_result}")
