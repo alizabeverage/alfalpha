@@ -36,3 +36,10 @@ This will install package: python3 -m build
 
 Follow this:
 https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/
+
+
+If git pull merge issues:
+```
+git reset --hard
+git pull
+```
