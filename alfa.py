@@ -125,23 +125,7 @@ def diff_ev_objective_function(theta):
 # ~~~~~~~~~~~~~~~~~~~~~~~ Run fitting tool ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 if __name__ == "__main__":  
-    # First, run differential_evolution to get a good starting point
-    _,prior = setup_params(diff_ev_parameters)
-    bounds = list(prior.values())  
-
-    # Run differential evolution optimization
-    result = differential_evolution(diff_ev_objective_function, bounds)
-
-    diff_ev_result = get_properties(result.x,diff_ev_parameters)
-    print(f"Differential evolution result: {diff_ev_result}")
-
-    # Now, run emcee, fix the starting position to the result of the differential evolution
-    nwalkers = 256
-    nsteps = 8000
-    nsteps_save = 100
-    thin = 1
-    post_process = True
-
+    #~~~~~~~~~~~~~~~~~~~~~ set up data and grids ~~~~~~~~~~~~~~~~~~~~~~~ #
     # use command arguments to get filename
     if len(sys.argv)>1:
         filename = sys.argv[1] # the script name is 0  
@@ -157,9 +141,25 @@ if __name__ == "__main__":
     # set up grid object
     print(f"Loading grids...")
     grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
-    
+
+    #~~~~~~~~~~~~~~~~~~~~~ run differential evolution ~~~~~~~~~~~~~~~~~~ #
+    _,prior = setup_params(diff_ev_parameters)
+    bounds = list(prior.values())  
+
+    # Run differential evolution optimization
+    result = differential_evolution(diff_ev_objective_function, bounds)
+
+    diff_ev_result = get_properties(result.x,diff_ev_parameters)
+    print(f"Differential evolution result: {diff_ev_result}")
+
 
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
+    # Now, run emcee, fix the starting position to the result of the differential evolution
+    nwalkers = 256
+    nsteps = 8000
+    nsteps_save = 100
+    thin = 1
+    post_process = True
     print("fitting with emcee...")
 
     # initialize walkers
