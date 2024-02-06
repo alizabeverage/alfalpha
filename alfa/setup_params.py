@@ -71,6 +71,17 @@ def setup_initial_position(nwalkers,parameters_to_fit):
 
     return pos
 
+
+def setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result):
+    default_pos, priors = setup_params(parameters_to_fit)
+    default_pos = np.array(default_pos)
+    pos = np.random.uniform(0,1,(nwalkers,len(parameters_to_fit)))
+
+    for key, value in diff_ev_result.items():
+        default_pos[parameters_to_fit==key] = value
+    
+    return default_pos + 1e-4 * np.random.randn(nwalkers, len(parameters_to_fit))
+
     
 
 def get_properties(theta,parameters_to_fit):

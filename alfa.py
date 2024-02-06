@@ -9,18 +9,21 @@ import corner
 from multiprocessing import Pool, cpu_count
 import matplotlib.pyplot as plt
 #from schwimmbad import MPIPool
-from alfa.setup_params import setup_params, get_properties, setup_initial_position
+from alfa.setup_params import setup_params, get_properties, setup_initial_position, setup_initial_position_diff_ev
 import os, sys
 from alfa.utils import correct_abundance
 from alfa.plot_outputs import plot_outputs
+from scipy.optimize import differential_evolution
 
 multip = False
 
 # must have alfa_home defined in bash profile
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_OUT = os.environ['ALFA_OUT']
-ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/results_test/'
+# ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/results_test/'
 #ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
+
+diff_ev_parameters = ['velz','sigma','logage','zH','mgh','feh']
 
 #parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
@@ -29,13 +32,13 @@ ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/results_test/'
 
 
 
-parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-                     'mgh']
+# parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
+#                      'mgh']
 
-# parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
-#                     'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
-#                     'tih', 'vh', 'crh','teff','jitter','logemline_h', 
-#                     'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
+parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
+                    'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
+                    'tih', 'vh', 'crh','teff','jitter','logemline_h', 
+                    'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
 
 # parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
@@ -108,12 +111,33 @@ else:
 
 
 
+def diff_ev_objective_function(theta):
+    # Generate model according to theta
+    params = get_properties(theta,diff_ev_parameters)
+    mflux = grids.get_model(params,outwave=data.wave)
+
+    # Perform polynomial normalization
+    poly, mfluxnorm = polynorm(data, mflux)
+
+    return np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~ Run fitting tool ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 if __name__ == "__main__":  
-    nwalkers = 128
-    nsteps = 600
+    # First, run differential_evolution to get a good starting point
+    _,prior = setup_params(diff_ev_parameters)
+    bounds = list(prior.values())  
+
+    # Run differential evolution optimization
+    result = differential_evolution(diff_ev_objective_function, bounds)
+
+    diff_ev_result = get_properties(result.x,diff_ev_parameters)
+    print(f"Differential evolution result: {diff_ev_result}")
+
+    # Now, run emcee, fix the starting position to the result of the differential evolution
+    nwalkers = 256
+    nsteps = 8000
     nsteps_save = 100
     thin = 1
     post_process = True
@@ -133,22 +157,14 @@ if __name__ == "__main__":
     # set up grid object
     print(f"Loading grids...")
     grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
-
-
-    # fit emission lines if HM 56163 or 23351
-    # if '56163' in filename or '23351' in filename:
-    #     parameters_to_fit+=list(np.unique(emline_strs[(wave_emlines<5600)&(wave_emlines>3800)]))
-    #     parameters_to_fit+=['velz2','sigma2']
-
-    # get the positions and priors of parameters_to_fit
-    # default_pos, priors = setup_params(parameters_to_fit)
     
 
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
     print("fitting with emcee...")
 
     # initialize walkers
-    pos = setup_initial_position(nwalkers,parameters_to_fit)
+    # pos = setup_initial_position(nwalkers,parameters_to_fit)
+    pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result)
     nwalkers, ndim = pos.shape
 
     # open file for saving steps
