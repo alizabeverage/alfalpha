@@ -143,15 +143,16 @@ if __name__ == "__main__":
     grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
 
     #~~~~~~~~~~~~~~~~~~~~~ run differential evolution ~~~~~~~~~~~~~~~~~~ #
+    print(f"Running differential evolution... diff_ev_parameters: {diff_ev_parameters}")
     _,prior = setup_params(diff_ev_parameters)
     bounds = list(prior.values())  
 
     # Run differential evolution optimization
     result = differential_evolution(diff_ev_objective_function, bounds)
-
+    
     diff_ev_result = get_properties(result.x,diff_ev_parameters)
     print(f"Differential evolution result: {diff_ev_result}")
-
+    print(f"Differential evolution success: {result.success}")
 
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
     # Now, run emcee, fix the starting position to the result of the differential evolution
@@ -163,8 +164,13 @@ if __name__ == "__main__":
     print("fitting with emcee...")
 
     # initialize walkers
-    # pos = setup_initial_position(nwalkers,parameters_to_fit)
-    pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result)
+    if result.success:
+        pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result)
+
+    else:
+        pos = setup_initial_position(nwalkers,parameters_to_fit)
+    
+    
     nwalkers, ndim = pos.shape
 
     # open file for saving steps
