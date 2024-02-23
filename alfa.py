@@ -23,7 +23,7 @@ ALFA_OUT = os.environ['ALFA_OUT']
 # ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/results_test/'
 #ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
 
-diff_ev_parameters = ['velz','sigma','logage','zH','mgh','feh']
+diff_ev_parameters = ['velz','sigma','logage','zH']
 
 #parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',

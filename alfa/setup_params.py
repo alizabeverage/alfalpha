@@ -32,7 +32,9 @@ def setup_params(parameters_to_fit=None):
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
                     'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[0,1000],'teff':[-50,50],
                     'jitter':[0.1,10]}
-    
+
+    # SUSPENSE    
+    priors_all['logage'] = [-0.1,0.8]
 
     if parameters_to_fit is None:
         return default_params, priors_all
