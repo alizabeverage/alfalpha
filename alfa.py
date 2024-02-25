@@ -60,7 +60,7 @@ if multip:
         mflux = grids.get_model(params,outwave=data.wave)
     
         #poly norm
-        poly, mfluxnorm = polynorm(data, mflux)
+        poly, mfluxnorm = polynorm(data, mflux, deg=8)
     
         if 'jitter' in parameters_to_fit:
             # copied from alf
@@ -88,7 +88,7 @@ else:
         mflux = grids.get_model(params,outwave=data.wave)
     
         #poly norm
-        poly, mfluxnorm = polynorm(data, mflux)
+        poly, mfluxnorm = polynorm(data, mflux, deg=8)
     
         if 'jitter' in parameters_to_fit:
             # copied from alf
