@@ -4,6 +4,7 @@ import os
 from .smoothing import smoothspec
 from scipy.interpolate import RegularGridInterpolator
 import os
+from numba import jit
 
 ckms = 2.998e5
 ALFA_HOME = os.environ['ALFA_HOME']

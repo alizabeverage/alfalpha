@@ -27,7 +27,7 @@ def fit_poly(wave, flux, err, mask, model, order=None):
 
     return (1.0 + poly)
 
-def polynorm(data_obj, model, return_data=False):
+def polynorm(data_obj, model, return_data=False, deg=None):
     # normalize model to data
     poly = np.nan*np.zeros(len(model))
     model_norm = np.nan*np.zeros(len(model))
@@ -40,7 +40,7 @@ def polynorm(data_obj, model, return_data=False):
         # one degree for every 100 AA
         polydegree = math.ceil(np.diff(region)/100)
         if polydegree>=14: polydegree = 14
-        polydegree = 8
+        if deg is not None: polydegree = deg
             
         poly[s] = fit_poly(data_obj.wave[s], data_obj.flux[s], data_obj.err[s], 
                             data_obj.mask[s], model[s], order=polydegree)
