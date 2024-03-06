@@ -23,20 +23,20 @@ def setup_params(parameters_to_fit=None,default_priors=False):
                     'jitter':[0.1,10]}
     else:   
         # Heavy Metal -- limit age, extend mgh, feh, zh 'logage':[-0.1,0.8], 'zH':[-1.5,0.2]
-        priors_all = {'velz':[-500,500], 'sigma':[100,500], 'logage':[-0.1,1.13], 'zH':[-1.5,0.2],
-                    'alpha':[-0.3,0.3],
-                    'feh':[-0.3,0.3], 'ah':[-0.3,0.3], 'ch':[-0.15,0.15], 
-                    'nh':[-0.3,0.3], 'nah':[-0.3,0.9], 'mgh':[-0.3,0.4], 'sih':[-0.3,0.3],
-                    'kh':[-0.3,0.3], 'cah':[-0.3,0.4], 'tih':[-0.3,0.3], 
-                    'vh':[-0.3,0.3], 'crh':[-0.3,0.3], 'mnh':[-0.3,0.3], 'coh':[-0.3,0.3],
-                    'nih':[-0.3,0.3], 'cuh':[-0.3,0.3], 'srh':[-0.3,0.3], 'bah':[-0.3,0.3], 
-                    'euh':[-0.3,0.3], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
+        priors_all = {'velz':[-500,500], 'sigma':[100,500], 'logage':[-0.1,1.13], 'zH':[-1.5,0.3],
+                    'alpha':[-0.3,0.5],
+                    'feh':[-0.3,0.5], 'ah':[-0.3,0.5], 'ch':[-0.3,0.5], 
+                    'nh':[-0.3,0.5], 'nah':[-0.3,1.0], 'mgh':[-0.3,0.5], 'sih':[-0.3,0.5],
+                    'kh':[-0.3,0.5], 'cah':[-0.3,0.5], 'tih':[-0.3,0.5], 
+                    'vh':[-0.3,0.5], 'crh':[-0.3,0.5], 'mnh':[-0.3,0.5], 'coh':[-0.3,0.5],
+                    'nih':[-0.3,0.5], 'cuh':[-0.3,0.5], 'srh':[-0.3,0.5], 'bah':[-0.3,0.5], 
+                    'euh':[-0.3,0.5], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
                     'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[0,1000],'teff':[-50,50],
                     'jitter':[0.1,10]}
 
         # SUSPENSE    
-        priors_all['logage'] = [-0.1,0.8]
+        priors_all['logage'] = [-0.3,0.8]
 
     if parameters_to_fit is None:
         return default_params, priors_all
