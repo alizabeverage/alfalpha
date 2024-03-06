@@ -9,7 +9,7 @@ import corner
 from multiprocessing import Pool, cpu_count
 import matplotlib.pyplot as plt
 #from schwimmbad import MPIPool
-from alfa.setup_params import setup_params, get_properties, setup_initial_position, setup_initial_position_diff_ev
+from alfa.setup_params import setup_params,get_properties, setup_initial_position, setup_initial_position_diff_ev
 import os, sys
 from alfa.utils import correct_abundance
 from alfa.plot_outputs import plot_outputs
@@ -36,9 +36,9 @@ diff_ev_parameters = ['velz','sigma','logage','zH']
 #                      'mgh']
 
 parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
-                    'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
-                    'tih', 'vh', 'crh','teff','jitter','logemline_h', 
-                    'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
+                    'ch', 'nh', 'mgh', 'nah', 'ah', 'sih', 'cah',
+                    'tih', 'crh', 'teff','jitter','logemline_h', 
+                    'velz2', 'sigma2'])
 
 # parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
 #                     'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
@@ -60,7 +60,7 @@ if multip:
         mflux = grids.get_model(params,outwave=data.wave)
     
         #poly norm
-        poly, mfluxnorm = polynorm(data, mflux, deg=8)
+        poly, mfluxnorm = polynorm(data, mflux, deg=None)
     
         if 'jitter' in parameters_to_fit:
             # copied from alf
@@ -88,7 +88,7 @@ else:
         mflux = grids.get_model(params,outwave=data.wave)
     
         #poly norm
-        poly, mfluxnorm = polynorm(data, mflux, deg=8)
+        poly, mfluxnorm = polynorm(data, mflux, deg=None)
     
         if 'jitter' in parameters_to_fit:
             # copied from alf

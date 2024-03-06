@@ -10,6 +10,10 @@ ckms = 2.998e5
 ALFA_HOME = os.environ['ALFA_HOME']
 ALFA_INFILES = os.environ['ALFA_INFILES']
 
+# define alpha elements used if fitting in lockstep
+# currently defined by vazdekis 2015 models
+alpha_elements = ['ah','mgh','sih','cah','tih']
+
 wave_emlines = np.array([4102.89, 4341.69, 4862.71, 4960.30, 5008.24, 
                          5203.05, 6549.86, 6564.61, 6585.27, 6718.29, 
                          6732.67, 3727.10, 3729.86, 3751.22, 3771.70, 
@@ -134,8 +138,18 @@ class Grids():
         # get SSP corresopnding to age and Z
         spec = 10**self.ssp.ssp_interp([params['logage'],params['zH']])
         
+        # fit elements in lockstep if "alpha" is in the parameter dictionary
+        if 'alpha' in params.keys():
+            value = params['alpha']
+            for key in alpha_elements:
+                interp = getattr(self.rfn, key[:-1]+'_interp')
+                spec *= interp([params['logage'],params['zH'],value])
+
         # add rfns corresponding to age and Z
         for key, value in params.items():
+            # if fitting in lockstep, skip the alpha elements
+            if ('alpha' in params.keys())&(key in alpha_elements):
+                continue
             if key in ['feh','ah','ch','nh','nah','mgh','sih',
                           'kh','cah','tih','vh','crh','mnh','coh',
                           'nih','cuh','srh','bah','euh']:
@@ -161,6 +175,8 @@ class Grids():
         # redshift the model and interpolate to data wavelength
         oneplusz = (1+params['velz']/ckms)
 
+        if outwave is None:
+            outwave = self.ssp.wave
         spec = np.interp(outwave, self.ssp.wave*oneplusz, spec)
 
     
@@ -308,13 +324,19 @@ class Rfn():
     def set_up_interpolators(self, age_dep_response = True, met_dep_response=True):
         '''
         set up interpolators
-        To do: properly treat Na and Teff, add age and Z independent interpolators
+        To do: add age and Z independent interpolators
         '''
         elements = ['na','ca','fe','c','n','a','ti','mg',
               'si','teff','cr','mn','ba','ni','co','eu','sr','k','v','cu']
 
         for e in elements:
-            if e+'p' in self.rfn_cols and e+'m' in self.rfn_cols:
+            if e == 'na':
+                # set up Na interpolants
+                p = np.array([self.nam/self.solar,self.solar/self.solar,
+                                self.nap/self.solar,self.nap6/self.solar,self.nap9/self.solar])
+                range_ = [-0.3,0,0.3,0.6,0.9] 
+
+            elif e+'p' in self.rfn_cols and e+'m' in self.rfn_cols:
                 p = np.array([getattr(self, e+'m')/self.solar,
                                 self.solar/self.solar,
                                 getattr(self, e+'p')/self.solar])
@@ -326,7 +348,7 @@ class Rfn():
                 p = np.array([self.solar/self.solar,
                                 getattr(self, e+'p')/self.solar])
                 range_ = [0,0.3]
-                
+
             else: print('problem reading in setting up interpolants')
 
         

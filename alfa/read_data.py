@@ -27,7 +27,11 @@ class Data():
         self.flux = tmp[:,1]
         self.err = tmp[:,2]
         self.mask = tmp[:,3]
-        self.ires = tmp[:,4]
+        
+        if len(tmp[0]) == 5:
+            self.ires = tmp[:,4]
+        else:
+            self.ires = np.zeros(len(self.wave))
 
         # this is how I'm dealing with masked values. Make nan
         # then it's not included in the log prob
