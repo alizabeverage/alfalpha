@@ -78,13 +78,10 @@ def setup_initial_position(nwalkers,parameters_to_fit,priors):
 
 
 def setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result,priors):
-    default_pos = np.array(default_pos)
-
     pos = setup_initial_position(nwalkers,parameters_to_fit,priors)
 
     for key, value in diff_ev_result.items():
-        default_pos[parameters_to_fit==key] = value
-        pos[:,parameters_to_fit==key] = default_pos[parameters_to_fit==key] + 1e-4 * np.random.randn(nwalkers,1)
+        pos[:,parameters_to_fit==key] = value + 1e-4 * np.random.randn(nwalkers,1)
     
     return pos
 
