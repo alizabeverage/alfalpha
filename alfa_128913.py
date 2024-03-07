@@ -9,7 +9,7 @@ import corner
 from multiprocessing import Pool, cpu_count
 import matplotlib.pyplot as plt
 #from schwimmbad import MPIPool
-from alfa.setup_params import setup_params,get_properties, setup_initial_position, setup_initial_position_diff_ev,get_init_pos_bounds
+from alfa.setup_params import setup_params,get_properties, setup_initial_position, setup_initial_position_diff_ev
 import os, sys
 from alfa.utils import correct_abundance
 from alfa.plot_outputs import plot_outputs
@@ -32,9 +32,6 @@ parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
 default_pos, priors = setup_params(parameters_to_fit)
 priors['zH'] = [-1.0,0.3]
 priors['jitter'] = [1.5,1.55]
-bounds = get_init_pos_bounds()
-bounds['zH'] = [-1.0,0.3]
-bounds['jitter'] = [1.5,1.55]
 ncpu = cpu_count()
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -111,7 +108,7 @@ if __name__ == "__main__":
     post_process = True
     print("fitting with emcee...")
 
-    pos = setup_initial_position(nwalkers,parameters_to_fit,init_pos=bounds)
+    pos = setup_initial_position(nwalkers,parameters_to_fit,priors=priors)
     
     
     

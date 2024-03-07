@@ -48,26 +48,11 @@ def setup_params(parameters_to_fit=None,default_priors=False):
         return default_pos, priors
     
 
-def get_init_pos_bounds():
-    return {'velz':[-5,5], 'sigma':[200,300],'logage':[0.2,0.6], 'zH':[-0.3,0.1],
-                    'alpha':[-0.2,0.2],
-                    'feh':[-0.2,0.2], 'ah':[-0.2,0.2], 'ch':[-0.1,0.1], 
-                    'nh':[-0.2,0.2], 'nah':[-0.1,0.6], 'mgh':[-0.2,0.2], 'sih':[-0.2,0.2],
-                    'kh':[-0.2,0.2], 'cah':[-0.2,0.2], 'tih':[-0.2,0.2],
-                    'vh':[-0.2,0.2], 'crh':[-0.2,0.2], 'mnh':[-0.2,0.2], 'coh':[-0.2,0.2],
-                    'nih':[-0.2,0.2], 'cuh':[-0.2,0.2], 'srh':[-0.2,0.2], 'bah':[-0.2,0.2], 
-                    'euh':[-0.2,0.2], 'logemline_h':[-2,0.2], 'logemline_ni':[-2,0.2], 
-                    'logemline_nii':[-2,0.2], 'logemline_oii':[-2,0.2], 'logemline_oiii':[-2,0.2],
-                    'logemline_sii':[-2,0.2], 'velz2':[-5,5], 'sigma2':[200,300],'teff':[-20,20],
-                    'jitter':[0.7,1.3]}
 
-def setup_initial_position(nwalkers,parameters_to_fit,init_pos=None):
-    default_pos, priors = setup_params(parameters_to_fit)
+def setup_initial_position(nwalkers,parameters_to_fit,priors):
     pos = np.random.uniform(0,1,(nwalkers,len(parameters_to_fit)))
 
-    if init_pos is None:
-        # starting positions.... 'logage':[0.1,0.4], 'zH':[-0.8,0.1]
-        init_pos = {'velz':[-5,5], 'sigma':[200,300],'logage':[0.2,0.6], 'zH':[-0.3,0.1],
+    init_pos = {'velz':[-5,5], 'sigma':[200,300],'logage':[0.2,0.6], 'zH':[-0.3,0.1],
                         'alpha':[-0.2,0.2],
                         'feh':[-0.2,0.2], 'ah':[-0.2,0.2], 'ch':[-0.1,0.1], 
                         'nh':[-0.2,0.2], 'nah':[-0.1,0.6], 'mgh':[-0.2,0.2], 'sih':[-0.2,0.2],
@@ -92,12 +77,10 @@ def setup_initial_position(nwalkers,parameters_to_fit,init_pos=None):
     return pos
 
 
-def setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result,init_pos=None):
-    default_pos, priors = setup_params(parameters_to_fit)
+def setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result,priors):
     default_pos = np.array(default_pos)
 
-    # add "init_pos" functionality so you can alter the initial positions in alfa.py
-    pos = setup_initial_position(nwalkers,parameters_to_fit,init_pos=init_pos)
+    pos = setup_initial_position(nwalkers,parameters_to_fit,priors)
 
     for key, value in diff_ev_result.items():
         default_pos[parameters_to_fit==key] = value
