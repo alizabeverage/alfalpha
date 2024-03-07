@@ -69,8 +69,8 @@ def setup_initial_position(nwalkers,parameters_to_fit,priors):
         range_ = init_pos[param]
         prior = priors[param]
         
-        if range_[0]<prior[0]: range_[0] = prior[0]
-        if range_[1]>prior[1]: range_[1] = prior[1]
+        if (range_[0]>prior[1])|(range_[0]<prior[0]): range_[0] = prior[0]
+        if (range_[1]<prior[0])|(range_[1]>prior[1]): range_[1] = prior[1]
 
         pos[:,i] = pos[:,i]*(range_[1] - range_[0]) + range_[0]
 
