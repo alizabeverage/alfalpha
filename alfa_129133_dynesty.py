@@ -13,7 +13,11 @@ from alfa.setup_params import setup_params,get_properties, setup_initial_positio
 import os, sys
 from alfa.utils import correct_abundance
 from alfa.plot_outputs import plot_outputs
+from dynesty import DynamicNestedSampler
 from scipy.optimize import differential_evolution
+from time import time
+import pickle
+from dynesty.utils import resample_equal
 
 multip = False
 
@@ -74,6 +78,59 @@ def diff_ev_objective_function(theta):
     return np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
 
 
+def plotposts(samples, **kwargs):
+        """
+        Function to plot posteriors using corner.py and scipy's gaussian KDE function.
+        """
+        fig = corner.corner(samples, labels=parameters_to_fit, hist_kwargs={'density': True}, **kwargs)
+    
+        # plot KDE smoothed version of distributions
+        for i,samps in enumerate(samples.T):
+            axidx = i*(samples.shape[1]+1)
+            kde = gaussian_kde(samps)
+            xvals = fig.axes[axidx].get_xlim()
+            xvals = np.linspace(xvals[0], xvals[1], 100)
+            fig.axes[axidx].plot(xvals, kde(xvals), color='firebrick')
+
+        return fig
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~ dynesty ~~~~~~~~~~~~~~~~~~~~~~~ #
+
+def prior_transform(theta):
+    """
+    A function defining the tranform between the parameterisation in the unit hypercube
+    to the true parameters.
+
+    Args:
+        theta (tuple): a tuple containing the parameters.
+        
+    Returns:
+        tuple: a new tuple or array with the transformed parameters.
+
+    mmu = 0.     # mean of Gaussian prior on m
+    msigma = 10. # standard deviation of Gaussian prior on m
+    m = mmu + msigma*ndtri(mprime) # convert back to m
+    """
+
+    return np.array([p*(prio[1]-prio[0]) + prio[0] for (p,prio) in zip(theta,priors.values())])
+
+def loglikelihood_dynesty(theta): # multiprocessing
+    # generate model according to theta
+    params = get_properties(theta,parameters_to_fit)
+    mflux = grids.get_model(params,outwave=data.wave)
+
+    #poly norm
+    poly, mfluxnorm = polynorm(data, mflux,deg=None)
+
+    if 'jitter' in parameters_to_fit:
+        # copied from alf
+        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2*params['jitter']**2) \
+                        + np.log(2*np.pi*data.err**2*params['jitter']**2))
+    else:
+        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
+
+
 
 if __name__ == "__main__":  
     filename = sys.argv[1] # the script name is 0  
@@ -86,62 +143,81 @@ if __name__ == "__main__":
     print(f"Loading grids...")
     grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
 
-    #~~~~~~~~~~~~~~~~~~~~~ run differential evolution ~~~~~~~~~~~~~~~~~~ #
-    print(f"Running differential evolution... diff_ev_parameters: {diff_ev_parameters}")
-    _,prior = setup_params(diff_ev_parameters)
-    bounds = list(prior.values())  
+    post_process = True
 
-    # Run differential evolution optimization
-    result = differential_evolution(diff_ev_objective_function, bounds,disp=False,updating='deferred')
+    # #~~~~~~~~~~~~~~~~~~~~~ run differential evolution ~~~~~~~~~~~~~~~~~~ #
+    # print(f"Running differential evolution... diff_ev_parameters: {diff_ev_parameters}")
+    # _,prior = setup_params(diff_ev_parameters)
+    # bounds = list(prior.values())  
+
+    # # Run differential evolution optimization
+    # result = differential_evolution(diff_ev_objective_function, bounds,disp=False,updating='deferred')
     
-    diff_ev_result = get_properties(result.x,diff_ev_parameters)
-    print(f"Differential evolution result: {diff_ev_result}")
-    print(f"Differential evolution success: {result.success}")
+    # diff_ev_result = get_properties(result.x,diff_ev_parameters)
+    # print(f"Differential evolution result: {diff_ev_result}")
+    # print(f"Differential evolution success: {result.success}")
 
     #~~~~~~~~~~~~~~~~~~~~~ emcee ~~~~~~~~~~~~~~~~~~~~~~~ #
-    # Now, run emcee, fix the starting position to the result of the differential evolution
-    nwalkers = 256
-    nsteps = 8000
-    nsteps_save = 100
-    thin = 1
-    post_process = True
-    print("fitting with emcee...")
+    # # Now, run emcee, fix the starting position to the result of the differential evolution
+    # nwalkers = 256
+    # nsteps = 8000
+    # nsteps_save = 100
+    # thin = 1
+    # post_process = True
+    # print("fitting with emcee...")
 
-    # initialize walkers
-    if result.success:
-        pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result)
+    # # initialize walkers
+    # if result.success:
+    #     pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result)
 
-    else:
-        pos = setup_initial_position(nwalkers,parameters_to_fit)
+    # else:
+    #     pos = setup_initial_position(nwalkers,parameters_to_fit)
     
     
-    nwalkers, ndim = pos.shape
+    # nwalkers, ndim = pos.shape
 
-    # open file for saving steps
-    filename = filename.split('/')[-1]
-    backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
-    backend.reset(nwalkers, ndim)
-    with Pool() as pool: 
-        #sample
-        sampler = emcee.EnsembleSampler(
-            nwalkers, ndim, lnprob, backend=backend 
-              )
-        sampler.run_mcmc(pos, nsteps, progress=True);
+    # # open file for saving steps
+    # filename = filename.split('/')[-1]
+    # backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
+    # backend.reset(nwalkers, ndim)
+    # with Pool() as pool: 
+    #     #sample
+    #     sampler = emcee.EnsembleSampler(
+    #         nwalkers, ndim, lnprob, backend=backend 
+    #           )
+    #     sampler.run_mcmc(pos, nsteps, progress=True);
+
+
+    #~~~~~~~~~~~~~~~~~~~~~ dynesty ~~~~~~~~~~~~~~~~~~~~~~~ #
+    dsampler = DynamicNestedSampler(loglikelihood_dynesty, prior_transform, len(parameters_to_fit))
+
+    t0 = time()
+    dsampler.run_nested()
+    t1 = time()
+    
+    timedynesty = (t1-t0)
+    
+    print("Time taken to run 'dynesty' (in static mode) is {} seconds".format(timedynesty))
+
+    res = dsampler.results # get results dictionary from sampler
+    
+    with open(f'{ALFA_OUT}{filename}.pkl', 'wb') as f:
+        pickle.dump(res, f)
 
     # #~~~~~~~~~~~~~~~~~~~~~ post-process ~~~~~~~~~~~~~~~~~~~~~~~ #
 
     if post_process:
-        reader = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
-        flat_samples = reader.get_chain(discard=nsteps-nsteps_save, thin=thin, flat=True)
+        with open(f'{ALFA_OUT}{filename}.pkl', 'rb') as f:
+            res = pickle.load(f)
+        
+        # draw posterior samples
+        weights = np.exp(res['logwt'] - res['logz'][-1])
+        flat_samples = resample_equal(res.samples, weights)
 
 
         # corner plot
-        sel = np.ones(len(parameters_to_fit)).astype(bool)
-        fig = corner.corner(
-            flat_samples[:,sel], labels=np.array(parameters_to_fit)[sel],
-            show_titles=True
-        )
-        plt.savefig(f"{ALFA_OUT}{filename}_corner.jpeg")
+        fig = plotposts(flat_samples)
+        plt.savefig(f"{ALFA_OUT}{filename}_dyncorner.jpeg")
     
         
         # best-fit spectra
@@ -163,7 +239,7 @@ if __name__ == "__main__":
         plt.ylabel('F$_\lambda$')
         plt.tight_layout()
     
-        plt.savefig(f"{ALFA_OUT}{filename}_bestspec.jpeg",dpi=200)
+        plt.savefig(f"{ALFA_OUT}{filename}_dynbestspec.jpeg",dpi=200)
         
     
         # save outputs in summary file
@@ -195,7 +271,7 @@ if __name__ == "__main__":
         
         df = pd.DataFrame.from_dict(dict_results)
         np.savetxt(
-            f"{ALFA_OUT}{filename}.sum",
+            f"{ALFA_OUT}{filename}_dynesty.sum",
             df.values,
             fmt='%10.3f',
             header=''.join([f'{col:20}' for col in df.columns]),
