@@ -30,7 +30,7 @@ parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
 
 
 default_pos, priors = setup_params(parameters_to_fit)
-priors['jitter'] = [1.6,1.66]
+
 ncpu = cpu_count()
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -108,12 +108,11 @@ if __name__ == "__main__":
     print("fitting with emcee...")
 
     # initialize walkers
-    #if result.success:
-    #    pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result,
-    #                                         priors=priors)
+    if result.success:
+        pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result)
 
-    #else:
-    pos = setup_initial_position(nwalkers,parameters_to_fit,priors=priors)
+    else:
+        pos = setup_initial_position(nwalkers,parameters_to_fit)
     
     
     nwalkers, ndim = pos.shape
