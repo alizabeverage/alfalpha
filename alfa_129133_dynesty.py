@@ -200,7 +200,8 @@ if __name__ == "__main__":
     print("Time taken to run 'dynesty' (in static mode) is {} seconds".format(timedynesty))
 
     res = dsampler.results # get results dictionary from sampler
-    
+
+    filename = filename.split('/')[-1]    
     with open(f'{ALFA_OUT}{filename}.pkl', 'wb') as f:
         pickle.dump(res, f)
 
