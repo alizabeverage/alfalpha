@@ -18,6 +18,7 @@ from scipy.optimize import differential_evolution
 from time import time
 import pickle
 from dynesty.utils import resample_equal
+from scipy.stats import gaussian_kde
 
 multip = False
 

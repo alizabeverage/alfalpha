@@ -9,7 +9,8 @@ import corner
 from multiprocessing import Pool, cpu_count
 import matplotlib.pyplot as plt
 #from schwimmbad import MPIPool
-from alfa.setup_params import setup_params,get_properties, setup_initial_position, setup_initial_position_diff_ev
+from alfa.setup_params import setup_params, get_properties, \
+    setup_initial_position, setup_initial_position_diff_ev
 import os, sys
 from alfa.utils import correct_abundance
 from alfa.plot_outputs import plot_outputs
@@ -18,38 +19,24 @@ from scipy.optimize import differential_evolution
 multip = False
 
 # must have alfa_home defined in bash profile
-ALFA_HOME = os.environ['ALFA_HOME']
-ALFA_OUT = os.environ['ALFA_OUT']
+ALFA_INFILES = os.environ['ALFA_INFILES']
+ALFA_OUT = os.environ['ALFA_OUT'] # this is where the output files will be saved
+
+# otherwise, set the path manually
 # ALFA_OUT = '/Users/alizabeverage/Research/chem_ev/mock_spectra/results_test/'
-#ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
+# ALFA_OUT = 'Users/alizabeverage/Research/JWST/'
 
 diff_ev_parameters = ['velz','sigma','logage','zH']
-
-#parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-#                     'ah', 'ch', 'nh', 'mgh', 'sih', 'kh', 'cah',
-#                     'tih', 'vh', 'crh', 'mnh', 'coh', 'nih',
-#                     'cuh', 'srh', 'bah', 'euh', 'teff', 'jitter']
-
-
-
-# parameters_to_fit = ['velz', 'sigma', 'logage', 'zH', 'feh',
-#                      'mgh']
 
 parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
                     'ch', 'nh', 'mgh', 'nah', 'ah', 'sih', 'cah',
                     'tih', 'crh', 'teff','jitter','logemline_h', 
                     'velz2', 'sigma2'])
 
-# parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
-#                     'ch', 'nh', 'mgh', 'ah','sih', 'kh', 'cah',
-#                     'tih', 'vh', 'crh','teff','jitter'])
-
-# parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH',
-#                      'jitter','logemline_h',
-#                      'logemline_oiii', 'logemline_ni','velz2', 'sigma2'])
-
+# get the default values and default priors
 default_pos, priors = setup_params(parameters_to_fit)
-
+# update priors here
+priors['jitter'] = [0.3,8]
 ncpu = cpu_count()
 # ~~~~~~~~~~~~~~~~~~~~~~~ probability stuff ~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -82,7 +69,7 @@ if multip:
         return lp*lnlike(theta, data, grids) # multiprocessing
 
 else:
-    def lnlike(theta): # multiprocessing
+    def lnlike(theta): 
         # generate model according to theta
         params = get_properties(theta,parameters_to_fit)
         mflux = grids.get_model(params,outwave=data.wave)
@@ -103,11 +90,11 @@ else:
             return 1.0
         return -np.inf
     
-    def lnprob(theta): # multiprocessing
+    def lnprob(theta):
         lp = lnprior(theta)
         if not np.isfinite(lp):
             return -np.inf
-        return lp*lnlike(theta) # multiprocessing
+        return lp*lnlike(theta) 
 
 
 
@@ -125,6 +112,7 @@ def diff_ev_objective_function(theta):
 # ~~~~~~~~~~~~~~~~~~~~~~~ Run fitting tool ~~~~~~~~~~~~~~~~~~~~~~~ #
 
 if __name__ == "__main__":  
+
     #~~~~~~~~~~~~~~~~~~~~~ set up data and grids ~~~~~~~~~~~~~~~~~~~~~~~ #
     # use command arguments to get filename
     if len(sys.argv)>1:
@@ -165,10 +153,10 @@ if __name__ == "__main__":
 
     # initialize walkers
     if result.success:
-        pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result)
+        pos = setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result=diff_ev_result,priors=priors)
 
     else:
-        pos = setup_initial_position(nwalkers,parameters_to_fit)
+        pos = setup_initial_position(nwalkers,parameters_to_fit,priors=priors)
     
     
     nwalkers, ndim = pos.shape

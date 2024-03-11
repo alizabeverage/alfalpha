@@ -4,11 +4,9 @@ import os
 from .smoothing import smoothspec
 from scipy.interpolate import RegularGridInterpolator
 import os
-from numba import jit
 
 ckms = 2.998e5
-ALFA_HOME = os.environ['ALFA_HOME']
-ALFA_INFILES = os.environ['ALFA_INFILES']
+ALFA_INFILES = os.environ['ALFA_INFILES'] # location of model files
 
 # define alpha elements used if fitting in lockstep
 # currently defined by vazdekis 2015 models
