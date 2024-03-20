@@ -38,7 +38,7 @@ def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
         # SUSPENSE    
         priors_all['logage'] = [-0.3,0.8]
 
-    elif default_priors&(model=='sMILES'):
+    elif model=='sMILES':
         priors_all = {'velz':[-200,200], 'sigma':[100,500], 'logage':[-0.3,1.2], 'zH':[-1.5,0.26],
                       'afe':[-0.2,0.6], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
