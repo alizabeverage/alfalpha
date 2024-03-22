@@ -57,6 +57,8 @@ def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
 
 
 def setup_initial_position(nwalkers,parameters_to_fit,priors):
+    parameters_to_fit = np.array(parameters_to_fit)
+
     pos = np.random.uniform(0,1,(nwalkers,len(parameters_to_fit)))
 
     init_pos = {'velz':[-5,5], 'sigma':[200,300],'logage':[0.2,0.6], 'zH':[-0.3,0.1],
@@ -85,6 +87,7 @@ def setup_initial_position(nwalkers,parameters_to_fit,priors):
 
 
 def setup_initial_position_diff_ev(nwalkers,parameters_to_fit,diff_ev_result,priors):
+    parameters_to_fit = np.array(parameters_to_fit)
     pos = setup_initial_position(nwalkers,parameters_to_fit,priors)
 
     for key, value in diff_ev_result.items():

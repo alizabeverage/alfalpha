@@ -50,6 +50,11 @@ class Info:
         self.diff_ev_success = True
 
     def save_settings(self, fname = None):
+        # json doesn't like numpy arrays
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], np.ndarray):
+                self.__dict__[key] = self.__dict__[key].tolist()
+
         if fname is None:
             fname = f"{self.ALFA_OUT}{self.filename}"
 
@@ -62,3 +67,8 @@ class Info:
         with open(f"{fname}.json", "r") as f:
             settings = json.load(f)
         self.__dict__.update(settings)
+
+        # convert lists back to numpy arrays
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], list):
+                self.__dict__[key] = np.array(self.__dict__[key])

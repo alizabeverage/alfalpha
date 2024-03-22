@@ -115,11 +115,13 @@ def diff_ev_objective_function(theta):
 
 if __name__ == "__main__":  
     filename = sys.argv[1] # the script name is 0  
-    fitting_info.filename = filename
     
     # set up data object
     print(f"Loading {filename}...")
     data = Data(filename)
+
+    filename = filename.split('/')[-1]
+    fitting_info.filename = filename
 
     # add the data info to fitting_info
     fitting_info.data_wave = data.wave
@@ -154,6 +156,7 @@ if __name__ == "__main__":
             fitting_info.diff_ev_results = diff_ev_result
             fitting_info.diff_ev_success = result.success
 
+            # print(fitting_info.nwalkers,fitting_info.parameters_to_fit,diff_ev_result)
             if result.success:
                 fitting_info.pos = setup_initial_position_diff_ev(fitting_info.nwalkers,fitting_info.parameters_to_fit,diff_ev_result=diff_ev_result,
                                                 priors=fitting_info.priors)   
@@ -163,7 +166,6 @@ if __name__ == "__main__":
 
         nwalkers, ndim = fitting_info.pos.shape
 
-        filename = filename.split('/')[-1]
         backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
         backend.reset(nwalkers, ndim)
         with Pool() as pool: 
