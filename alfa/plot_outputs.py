@@ -2,11 +2,12 @@ import emcee
 import matplotlib.pyplot as plt
 import corner
 import numpy as np
-#from alfa.read_data import Data
-#from alfa.grids import Grids
-#from alfa.polynorm import polynorm
-#from alfa.setup_params import get_properties
+from alfa.read_data import Data
+from alfa.grids import Grids
+from alfa.polynorm import polynorm
+from alfa.setup_params import get_properties
 import os
+from scipy.stats import gaussian_kde
 
 ALFA_OUT = os.environ['ALFA_OUT']
 
@@ -76,3 +77,20 @@ def plot_outputs(data, grids, parameters_to_fit, filename, reader=None, inst_res
     plt.ylabel('Flux')
     
     plt.savefig(f'{ALFA_OUT}/{filename}_spectrum.png',dpi=200)
+
+
+def plotposts(samples, parameters_to_fit, **kwargs):
+        """
+        Function to plot posteriors using corner.py and scipy's gaussian KDE function.
+        """
+        fig = corner.corner(samples, labels=parameters_to_fit, hist_kwargs={'density': True}, **kwargs)
+    
+        # plot KDE smoothed version of distributions
+        for i,samps in enumerate(samples.T):
+            axidx = i*(samples.shape[1]+1)
+            kde = gaussian_kde(samps)
+            xvals = fig.axes[axidx].get_xlim()
+            xvals = np.linspace(xvals[0], xvals[1], 100)
+            fig.axes[axidx].plot(xvals, kde(xvals), color='firebrick')
+
+        return fig
