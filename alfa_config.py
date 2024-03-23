@@ -25,8 +25,7 @@ from alfa.post_process import post_process
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''
-# must have alfa_home defined in bash profile
-ALFA_HOME = os.environ['ALFA_HOME']
+# must have alfa_out defined in bash profile
 ALFA_OUT = os.environ['ALFA_OUT']
 
 

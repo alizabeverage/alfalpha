@@ -1,22 +1,26 @@
 # alfalpha
 Elemental abundance fitting code based on the Conroy+18 MILES+IRTF+MIST SSP models and ATLAS response functions
 
-Make sure you have "ALFA_OUT", and "ALFA_INFILES" evironemnt variables set
-"ALFA_INFILES": Location of model grids (typically under alfalpha/infiles/)
-"ALFA_OUT": Where the output files are saved (can also be manually defined in alfa_template.py)
+Start by making sure you have "ALFA_OUT", and "ALFA_INFILES" environment variables set:
+
+- "ALFA_INFILES": Location of the Conroy+18 model grids (typically under alfalpha/infiles/)
+
+- "ALFA_OUT": Where the output files should be saved
 
 ``` bash
-export ALFA_HOME="/Users/alizabeverage/Software/alfalpha/"
-export ALFA_INFILES="/Users/alizabeverage/Software/alfalpha/infiles/"
-export ALFA_OUT="/Users/alizabeverage/Software/alfalpha/outfiles/"
+export ALFA_OUT="/path/to/repo/alfalpha/outfiles/"
+export ALFA_INFILES="/path/to/repo/alfalpha/infiles/"
+
+# if you have the Conroy alf code installed already, this would instead look something like:
+export ALFA_INFILES="/path/to/alf/alf-master/infiles/"
 ```
 
-To install the package:
+Then to install the package:
 ``` bash
 python3 -m build
 ```
 
-You may need to install/upgrad the build module:
+You may need to install/upgrade the build module:
 ``` bash
 python3 -m pip install --upgrade build
 ```

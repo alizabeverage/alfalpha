@@ -6,7 +6,6 @@ import json
 
 class Info:
     def __init__(self):
-        self.ALFA_HOME = os.environ['ALFA_HOME']
         self.ALFA_OUT = os.environ['ALFA_OUT']
 
         # which sampler do you want to use?

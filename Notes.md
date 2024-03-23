@@ -7,7 +7,6 @@ python3 -m build
 
 Add this to bash profile:
 ``` bash
-export ALFA_HOME="/Users/alizabeverage/Software/alfalpha/"
 export ALFA_INFILES="/Users/alizabeverage/Software/alfalpha/infiles/"
 export ALFA_OUT="/Users/alizabeverage/Software/alfalpha/outfiles/"
 ```
