@@ -5,7 +5,7 @@ import json
 
 
 class Info:
-    def __init__(self,fname=None):
+    def __init__(self,filename=None):
         self.ALFA_OUT = os.environ['ALFA_OUT']
 
         # which sampler do you want to use?
@@ -49,8 +49,8 @@ class Info:
         self.diff_ev_success = True
 
         # overwrite the above if you provide a .json file
-        if fname is not None:            
-            self.load_settings(fname)
+        if filename is not None:            
+            self.load_settings(fname=filename)
     
     def save_settings(self, fname = None):
         # json doesn't like numpy arrays
@@ -58,7 +58,7 @@ class Info:
             if isinstance(self.__dict__[key], np.ndarray):
                 self.__dict__[key] = self.__dict__[key].tolist()
 
-        if fname is not None:
+        if fname is None:
             fname = f"{self.ALFA_OUT}{self.filename}"
 
         with open(f"{fname}.json", "w") as f:

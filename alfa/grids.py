@@ -66,7 +66,9 @@ class Grids():
         # interpolate instrumental resolution for entire wavelength grid
         # use min/max inst_res around targetted wavelength range
         if np.size(inst_res)>1:
-            assert type(inst_res_wave) == np.ndarray
+            inst_res_wave = np.array(inst_res_wave)
+            inst_res = np.array(inst_res)
+            
             assert np.size(inst_res) == np.size(inst_res_wave)
             self.inst_res = np.interp(self.ssp.wave,inst_res_wave,self.inst_res,
                              left=np.min(self.inst_res),right=np.max(self.inst_res))
