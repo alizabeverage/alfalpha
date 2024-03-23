@@ -3,6 +3,14 @@ Run this to see that the variable instrumental resolution works
 python3 -m pip install --upgrade build
 python3 -m build
 
+Add this to bash profile:
+``` bash
+export ALFA_HOME="/Users/alizabeverage/Software/alfalpha/"
+export ALFA_INFILES="/Users/alizabeverage/Software/alfalpha/infiles/"
+export ALFA_OUT="/Users/alizabeverage/Software/alfalpha/outfiles/"
+```
+
+
 ``` python
 from alfa.grids import Grids
 import numpy as np
