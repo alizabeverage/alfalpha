@@ -25,6 +25,12 @@ You may need to install/upgrade the build module:
 python3 -m pip install --upgrade build
 ```
 
+To run the code:
+
+``` bash
+python3 alfa_config.py /path/to/data/file
+```
+
 
 Here is a snippet to test how long it takes to load a single model:
 
