@@ -15,7 +15,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Astronomy"
 ]
 dynamic = ["version"]
-dependencies = ["numpy", "astropy","scipy"]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 
 
