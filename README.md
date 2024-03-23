@@ -31,6 +31,11 @@ To run the code:
 python3 alfa_config.py /path/to/data/file
 ```
 
+For example (there is already a test spectrum in indata/):
+``` bash
+python3 alfa_config.py indata/test
+```
+
 
 Here is a snippet to test how long it takes to load a single model:
 
