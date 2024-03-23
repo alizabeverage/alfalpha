@@ -69,11 +69,11 @@ print(t2-t1)
 ```
 
 
-### Configuring the fitter using the alf_config.py file
+### The alf_config.py file
 
 ```alf_config.py``` is how users control the fitting settings. In this script, users can specify fitting parameters, prior ranges, and which sampler they want to use (along with sampler-specific parameters). All of these specifications are held in an instantiation of the ```Info()``` class and saved to the outfiles directory as a .json file so that users can remember which settings were used.
 
-### Outfiles
+### Code products
 After the sampler is completed, the results will be processed into various files:
 
 - ```filename.json``` -- Information about the fitting (saved as a ddictionary). This file includes priors, fitted parameters, the input spectrum, sampler information. This is an instantiation of the ```Info()``` that is converted to a dictionary prior to saving. To open the file as an instantiation of ```Info()```, do the following:
