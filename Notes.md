@@ -1,7 +1,9 @@
 Run this to see that the variable instrumental resolution works
 
+``` bash
 python3 -m pip install --upgrade build
 python3 -m build
+```
 
 Add this to bash profile:
 ``` bash
