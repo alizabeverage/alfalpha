@@ -1,5 +1,8 @@
 Run this to see that the variable instrumental resolution works
 
+python3 -m pip install --upgrade build
+python3 -m build
+
 ``` python
 from alfa.grids import Grids
 import numpy as np

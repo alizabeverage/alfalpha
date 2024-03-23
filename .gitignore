@@ -2,3 +2,5 @@
 *out
 *_version.py
 alfalpha.egg-info/
+build/
+dist/
