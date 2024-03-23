@@ -18,13 +18,7 @@ def post_process(fitting_info = None, fname = None):
 
     if fname is not None:
         # instantiate the Info class
-        fitting_info = Info()
-
-        # load the settings
-        fitting_info.load_settings(fname = fname)
-
-    elif fitting_info is not None:
-        pass
+        fitting_info = Info(fname = fname)
 
     # open walker files
     if fitting_info.sampler == 'emcee':

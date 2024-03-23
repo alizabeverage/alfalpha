@@ -181,7 +181,7 @@ if __name__ == "__main__":
 
     #~~~~~~~~~~~~~~~~~~~~~ post processing ~~~~~~~~~~~~~~~~~~~~~~~ #
     
-    post_process(fitting_info)
+    post_process(fitting_info, plot_corner=True, plot_bestspec=True)
 
 
 

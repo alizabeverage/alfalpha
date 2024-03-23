@@ -67,3 +67,28 @@ t2 = time.time()
 
 print(t2-t1)
 ```
+
+
+### Configuring the fitter using the alf_config.py file
+
+```alf_config.py``` is how users control the fitting settings. In this script, users can specify fitting parameters, prior ranges, and which sampler they want to use (along with sampler-specific parameters). All of these specifications are held in an instantiation of the ```Info()``` class and saved to the outfiles directory as a .json file so that users can remember which settings were used.
+
+### Outfiles
+After the sampler is completed, the results will be processed into various files:
+
+- ```filename.json``` -- Information about the fitting (saved as a ddictionary). This file includes priors, fitted parameters, the input spectrum, sampler information. This is an instantiation of the ```Info()``` that is converted to a dictionary prior to saving. To open the file as an instantiation of ```Info()```, do the following:
+
+
+```python
+from alfa.fitting_info import Info
+fitting_info = Info(filename)
+```
+
+
+- ```filename.sum``` -- An ascii table with the best-fit values from the fit
+- ```filename.bestspec``` -- an ascii table with the best-fit spectrum. The columns include: (1) wavelength array, (2) the normalized best-fit model, (3) the data spectrum in the specified fitting regions, (4) the inflated uncertainties (if jitter term was included in fitting procedure), and (5) the polynomial normalization associated with the best-fit model
+
+- ```filename_corner.jpeg``` -- Optionally, a corner plot can be plotted
+- ```filename_bestspec.jpeg``` -- Optionally, the best-fit spectrum can be plotted
+- ```filename.h5``` -- the emcee chains (only applicable if sampler == 'emcee')
+- ```filename.pkl``` -- the dyensty saved chains (only applicable if sampler == 'dynesty')
