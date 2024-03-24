@@ -48,13 +48,16 @@ fitting_info.diff_ev_parameters = ['velz','sigma','logage','zH']
 # if you want to fit emission lines, you include which line (e.g., 'logemline_h')
 # *and* 'velz2' and 'sigma2'
 fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
-                    'ch', 'nh', 'mgh', 'nah', 'ah', 'sih', 'cah',
-                    'tih', 'crh', 'teff','jitter','logemline_h', 
-                    'velz2', 'sigma2'])
+                                        'ch', 'nh', 'mgh', 'nah', 'ah', 'sih', 'cah',
+                                        'tih', 'crh', 'teff','jitter',
+                                        'logemline_h', 'logemline_ni', 
+                                        'logemline_nii', 'logemline_oii',
+                                    'logemline_oiii', 'logemline_sii',
+                                        'velz2', 'sigma2'])
 
 
 # you can alter the prior ranges here, but they're already set in Info() by "setup_params"
-fitting_info.priors['jitter'] = [1.6,1.66]
+# fitting_info.priors['jitter'] = [1.6,1.66]
 
 # set the polynomial degree for normalization
 fitting_info.poly_degree = 'default' # 'default' or int
@@ -211,7 +214,7 @@ if __name__ == "__main__":
         dsampler = DynamicNestedSampler(loglikelihood_dynesty, prior_transform, len(fitting_info.parameters_to_fit))
 
         t0 = time.time()
-        dsampler.run_nested(print_progress=True,maxiter=5000)
+        dsampler.run_nested()
         t1 = time.time()
         
         timedynesty = (t1-t0)

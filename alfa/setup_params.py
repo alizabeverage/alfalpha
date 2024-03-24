@@ -24,13 +24,13 @@ def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
     elif ~default_priors&(model=='conroy18'):
         # Heavy Metal -- limit age, extend mgh, feh, zh 'logage':[-0.1,0.8], 'zH':[-1.5,0.2]
         priors_all = {'velz':[-500,500], 'sigma':[100,500], 'logage':[-0.1,1.13], 'zH':[-1.5,0.3],
-                    'alpha':[-0.3,0.5],
-                    'feh':[-0.3,0.5], 'ah':[-0.3,0.5], 'ch':[-0.3,0.5], 
-                    'nh':[-0.3,0.5], 'nah':[-0.3,1.0], 'mgh':[-0.3,0.5], 'sih':[-0.3,0.5],
-                    'kh':[-0.3,0.5], 'cah':[-0.3,0.5], 'tih':[-0.3,0.5], 
-                    'vh':[-0.3,0.5], 'crh':[-0.3,0.5], 'mnh':[-0.3,0.5], 'coh':[-0.3,0.5],
-                    'nih':[-0.3,0.5], 'cuh':[-0.3,0.5], 'srh':[-0.3,0.5], 'bah':[-0.3,0.5], 
-                    'euh':[-0.3,0.5], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
+                    'alpha':[-0.5,0.5],
+                    'feh':[-0.5,0.5], 'ah':[-0.5,0.5], 'ch':[-0.5,0.5], 
+                    'nh':[-0.5,0.5], 'nah':[-0.5,1.0], 'mgh':[-0.5,0.5], 'sih':[-0.5,0.5],
+                    'kh':[-0.5,0.5], 'cah':[-0.5,0.5], 'tih':[-0.5,0.5], 
+                    'vh':[-053,0.5], 'crh':[-0.5,0.5], 'mnh':[-0.5,0.5], 'coh':[-0.5,0.5],
+                    'nih':[-0.5,0.5], 'cuh':[-0.5,0.5], 'srh':[-0.5,0.5], 'bah':[-0.5,0.5], 
+                    'euh':[-0.5,0.5], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
                     'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[0,1000],'teff':[-50,50],
                     'jitter':[0.1,10]}
