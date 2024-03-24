@@ -28,7 +28,7 @@ def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
                     'feh':[-0.5,0.5], 'ah':[-0.5,0.5], 'ch':[-0.5,0.5], 
                     'nh':[-0.5,0.5], 'nah':[-0.5,1.0], 'mgh':[-0.5,0.5], 'sih':[-0.5,0.5],
                     'kh':[-0.5,0.5], 'cah':[-0.5,0.5], 'tih':[-0.5,0.5], 
-                    'vh':[-053,0.5], 'crh':[-0.5,0.5], 'mnh':[-0.5,0.5], 'coh':[-0.5,0.5],
+                    'vh':[-0.5,0.5], 'crh':[-0.5,0.5], 'mnh':[-0.5,0.5], 'coh':[-0.5,0.5],
                     'nih':[-0.5,0.5], 'cuh':[-0.5,0.5], 'srh':[-0.5,0.5], 'bah':[-0.5,0.5], 
                     'euh':[-0.5,0.5], 'logemline_h':[-6,1], 'logemline_ni':[-6,1], 
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
