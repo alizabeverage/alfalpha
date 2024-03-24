@@ -36,9 +36,9 @@ fitting_info = Info()
 fitting_info.sampler = 'emcee' # 'dynesty' or 'emcee'
 if fitting_info.sampler == 'emcee':
     # emcee parameters
-    fitting_info.nwalkers = 40 #256
-    fitting_info.nsteps = 100 #8000
-    fitting_info.nsteps_save = 10 #100
+    fitting_info.nwalkers = 256
+    fitting_info.nsteps = 8000
+    fitting_info.nsteps_save = 100
 
 
 # which parameters (if any) do you want to "pre-fit"?
