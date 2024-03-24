@@ -127,12 +127,13 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
             dict_results[param_st+'50'] = [np.median(dist-Fe)]
             dict_results[param_st+'84'] = [np.percentile(dist-Fe,84)]
     
-    # add the "metallicity" as defined in Thomas et al. 2003
+    # add the "metallicity" [Z/H] as defined in Thomas et al. 2003
     mgh = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
                             flat_samples[:,fitting_info.parameters_to_fit=='mgh'].ravel(),'mgh')
     feh = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
                             flat_samples[:,fitting_info.parameters_to_fit=='feh'].ravel(),'feh')
     mgfe = mgh-feh
+
     zh = np.array(feh + 0.94*mgfe)
     dict_results['[Z/H]_thomas16'] = [np.percentile(zh,16)]
     dict_results['[Z/H]_thomas50'] = [np.median(zh)]
