@@ -56,8 +56,11 @@ fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh
                                         'velz2', 'sigma2'])
 
 
+# initialize priors
+_, fitting_info.priors = setup_params(fitting_info.parameters_to_fit)
+
 # you can alter the prior ranges here, but they're already set in Info() by "setup_params"
-# fitting_info.priors['jitter'] = [1.6,1.66]
+fitting_info.priors['feh'] = [-0.5,0.5]
 
 # set the polynomial degree for normalization
 fitting_info.poly_degree = 'default' # 'default' or int
