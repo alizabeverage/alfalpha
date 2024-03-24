@@ -2,20 +2,17 @@ from alfa.grids import *
 from alfa.read_data import Data
 from alfa.polynorm import polynorm
 import numpy as np
-import pandas as pd
-import csv
 import emcee
-import corner
 from multiprocessing import Pool, cpu_count
-import matplotlib.pyplot as plt
 #from schwimmbad import MPIPool
 from alfa.setup_params import setup_params,get_properties, setup_initial_position, setup_initial_position_diff_ev
 import os, sys
-from alfa.utils import correct_abundance
-from alfa.plot_outputs import plot_outputs
 from scipy.optimize import differential_evolution
 from alfa.fitting_info import Info
 from alfa.post_process import post_process
+from dynesty import DynamicNestedSampler
+import pickle
+import time
 
 
 '''
@@ -33,12 +30,13 @@ ALFA_OUT = os.environ['ALFA_OUT']
 fitting_info = Info()
 
 # which sampler do you want to use?
-fitting_info.sampler = 'emcee' # 'dynesty' or 'emcee'
+fitting_info.sampler = 'dynesty' # 'dynesty' or 'emcee'
+
 if fitting_info.sampler == 'emcee':
     # emcee parameters
-    fitting_info.nwalkers = 256
-    fitting_info.nsteps = 8000
-    fitting_info.nsteps_save = 100
+    fitting_info.nwalkers = 40 #256
+    fitting_info.nsteps = 50 #8000
+    fitting_info.nsteps_save = 10#100
 
 
 # which parameters (if any) do you want to "pre-fit"?
@@ -110,6 +108,40 @@ def diff_ev_objective_function(theta):
 
     return np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
 
+# dyensty functions
+def prior_transform(theta):
+    """
+    A function defining the tranform between the parameterisation in the unit hypercube
+    to the true parameters.
+
+    Args:
+        theta (tuple): a tuple containing the parameters.
+        
+    Returns:
+        tuple: a new tuple or array with the transformed parameters.
+
+    mmu = 0.     # mean of Gaussian prior on m
+    msigma = 10. # standard deviation of Gaussian prior on m
+    m = mmu + msigma*ndtri(mprime) # convert back to m
+    """
+
+    return np.array([p*(prio[1]-prio[0]) + prio[0] for (p,prio) in zip(theta,fitting_info.priors.values())])
+
+def loglikelihood_dynesty(theta): # multiprocessing
+    # generate model according to theta
+    params = get_properties(theta,fitting_info.parameters_to_fit)
+    mflux = grids.get_model(params,outwave=data.wave)
+
+    #poly norm
+    poly, mfluxnorm = polynorm(data, mflux,deg=None)
+
+    if 'jitter' in fitting_info.parameters_to_fit:
+        # copied from alf
+        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2*params['jitter']**2) \
+                        + np.log(2*np.pi*data.err**2*params['jitter']**2))
+    else:
+        return -0.5*np.nansum((data.flux - mfluxnorm)**2/(data.err**2))
+
 
 
 if __name__ == "__main__":  
@@ -165,7 +197,7 @@ if __name__ == "__main__":
 
         nwalkers, ndim = fitting_info.pos.shape
 
-        backend = emcee.backends.HDFBackend(f"{ALFA_OUT}{filename}.h5")
+        backend = emcee.backends.HDFBackend(f"{fitting_info.ALFA_OUT}{fitting_info.filename}.h5")
         backend.reset(nwalkers, ndim)
         with Pool() as pool: 
             #sample
@@ -176,7 +208,20 @@ if __name__ == "__main__":
     
 
     elif fitting_info.sampler == 'dynesty':
-        raise NotImplementedError("Dynesty not implemented yet")
+        dsampler = DynamicNestedSampler(loglikelihood_dynesty, prior_transform, len(fitting_info.parameters_to_fit))
+
+        t0 = time.time()
+        dsampler.run_nested(print_progress=True,maxiter=5000)
+        t1 = time.time()
+        
+        timedynesty = (t1-t0)
+        
+        print("Time taken to run 'dynesty' (in static mode) is {} seconds".format(timedynesty))
+
+        res = dsampler.results # get results dictionary from sampler
+
+        with open(f'{fitting_info.ALFA_OUT}{fitting_info.filename}.pkl', 'wb') as f:
+            pickle.dump(res, f)
     
 
     #~~~~~~~~~~~~~~~~~~~~~ post processing ~~~~~~~~~~~~~~~~~~~~~~~ #

@@ -9,6 +9,9 @@ from alfa.read_data import Data
 from alfa.polynorm import polynorm
 from alfa.utils import correct_abundance
 import pandas as pd
+import pickle
+from dynesty.utils import resample_equal
+from scipy.stats import gaussian_kde
 
 
 def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bestspec=True):
@@ -19,7 +22,7 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
 
     if fname is not None:
         # instantiate the Info class
-        fitting_info = Info(fname = fname)
+        fitting_info = Info(filename = fname)
 
     # open walker files
     if fitting_info.sampler == 'emcee':
@@ -27,17 +30,33 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
         flat_samples = reader.get_chain(discard=fitting_info.nsteps-fitting_info.nsteps_save, thin=1, flat=True)
 
     elif fitting_info.sampler == 'dynesty':
-        raise ValueError("Dynesty not yet implemented in post_process")
+        with open(f'{fitting_info.ALFA_OUT}{fitting_info.filename}.pkl', 'rb') as f:
+            res = pickle.load(f)
+        
+        # draw posterior samples
+        weights = np.exp(res['logwt'] - res['logz'][-1])
+        flat_samples = resample_equal(res.samples, weights)
 
     # corner plot
     if plot_corner:
-        sel = np.ones(len(fitting_info.parameters_to_fit)).astype(bool)
-        fig = corner.corner(
-            flat_samples[:,sel], labels=np.array(fitting_info.parameters_to_fit)[sel],
-            show_titles=True
-        )
+        # plot posteriors using corner.py and scipy's gaussian KDE function.
+        fig = corner.corner(flat_samples, labels=fitting_info.parameters_to_fit, hist_kwargs={'density': True})
+    
+        # plot KDE smoothed version of distributions
+        for i,samps in enumerate(flat_samples.T):
+            axidx = i*(flat_samples.shape[1]+1)
+            kde = gaussian_kde(samps)
+            xvals = fig.axes[axidx].get_xlim()
+            xvals = np.linspace(xvals[0], xvals[1], 100)
+            fig.axes[axidx].plot(xvals, kde(xvals), color='firebrick')
+        
         plt.savefig(f"{fitting_info.ALFA_OUT}{fitting_info.filename}_corner.jpeg")
-
+        # sel = np.ones(len(fitting_info.parameters_to_fit)).astype(bool)
+        # fig = corner.corner(
+        #     flat_samples[:,sel], labels=np.array(fitting_info.parameters_to_fit)[sel],
+        #     show_titles=True
+        # )
+        
     
     # best-fit spectra
     data = Data()
