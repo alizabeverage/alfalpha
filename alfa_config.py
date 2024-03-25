@@ -137,8 +137,10 @@ def loglikelihood_dynesty(theta): # multiprocessing
     params = get_properties(theta,fitting_info.parameters_to_fit)
     mflux = grids.get_model(params,outwave=data.wave)
 
-    #poly norm
-    poly, mfluxnorm = polynorm(data, mflux,deg=None)
+    # perform polynomial normalization
+    if fitting_info.poly_degree == 'default': deg = None
+    else: deg = fitting_info.poly_degree
+    poly, mfluxnorm = polynorm(data, mflux, deg=deg)
 
     if 'jitter' in fitting_info.parameters_to_fit:
         # copied from alf

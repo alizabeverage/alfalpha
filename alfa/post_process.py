@@ -40,7 +40,8 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
     # corner plot
     if plot_corner:
         # plot posteriors using corner.py and scipy's gaussian KDE function.
-        fig = corner.corner(flat_samples, labels=fitting_info.parameters_to_fit, hist_kwargs={'density': True})
+        fig = corner.corner(flat_samples, labels=fitting_info.parameters_to_fit, 
+                            show_titles=True, hist_kwargs={'density': True})
     
         # plot KDE smoothed version of distributions
         for i,samps in enumerate(flat_samples.T):
