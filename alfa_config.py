@@ -50,9 +50,7 @@ fitting_info.diff_ev_parameters = ['velz','sigma','logage','zH']
 fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
                                         'ch', 'nh', 'mgh', 'nah', 'ah', 'sih', 'cah',
                                         'tih', 'crh', 'teff','jitter',
-                                        'logemline_h', 'logemline_ni', 
-                                        'logemline_nii', 'logemline_oii',
-                                    'logemline_oiii', 'logemline_sii',
+                                        'logemline_h', 'logemline_oiii',
                                         'velz2', 'sigma2'])
 
 
@@ -64,6 +62,7 @@ fitting_info.priors['feh'] = [-0.5,0.5]
 
 # set the polynomial degree for normalization
 fitting_info.poly_degree = 'default' # 'default' or int
+fitting_info.poly_degree = 7
 
 
 '''
