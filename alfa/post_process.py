@@ -113,7 +113,7 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
     df = pd.DataFrame(bestspec)
     np.savetxt(f"{fitting_info.ALFA_OUT}{fitting_info.filename}.bestspec",
                df.values,
-               fmt='%11.3f %11.3e %11.3e %11.3f %11.3f',
+               fmt='%11.3f %11.3e %11.3e %11.3e %11.3e',
                header=''.join([f'{col:20}' for col in df.columns]),
                comments='')
 
