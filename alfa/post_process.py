@@ -125,6 +125,8 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
     # define Fe for retrieving [X/Fe]
     Fe = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
                                         flat_samples[:,fitting_info.parameters_to_fit=='feh'].ravel(),'feh')
+    Mg = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
+                                        flat_samples[:,fitting_info.parameters_to_fit=='mgh'].ravel(),'mgh')
     for i,param in enumerate(fitting_info.parameters_to_fit):
         dict_results[param+'16'] = [np.percentile(flat_samples[:,i],16)]
         dict_results[param+'50'] = [np.median(flat_samples[:,i])]
@@ -146,6 +148,11 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
             dict_results[param_st+'16'] = [np.percentile(dist-Fe,16)]
             dict_results[param_st+'50'] = [np.median(dist-Fe)]
             dict_results[param_st+'84'] = [np.percentile(dist-Fe,84)]
+
+            param_st = '['+param[:-1].capitalize()+'/Mg]'
+            dict_results[param_st+'16'] = [np.percentile(dist-Mg,16)]
+            dict_results[param_st+'50'] = [np.median(dist-Mg)]
+            dict_results[param_st+'84'] = [np.percentile(dist-Mg,84)]
     
     # add the "metallicity" [Z/H] as defined in Thomas et al. 2003
     mgh = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),

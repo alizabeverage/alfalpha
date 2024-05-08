@@ -62,7 +62,6 @@ fitting_info.priors['feh'] = [-0.5,0.5]
 
 # set the polynomial degree for normalization
 fitting_info.poly_degree = 'default' # 'default' or int
-fitting_info.poly_degree = 7
 
 
 '''
