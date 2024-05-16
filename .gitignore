@@ -2,6 +2,7 @@
 *out
 *_version.py
 alfalpha.egg-info/
+alfa.egg-info/
 build/
 dist/
 old_files/
