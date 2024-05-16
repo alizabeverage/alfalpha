@@ -1,5 +1,5 @@
 [project]
-name = "alfalpha"
+name = "alfa"
 description = "Elemental abundance fitting code based on Fortran alf"
 authors = [
     { name="Aliza Beverage", email="abeverage@berkeley.edu" },
