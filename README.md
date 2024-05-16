@@ -1,4 +1,4 @@
-# alfalpha
+# alfa
 Elemental abundance fitting code based on the Conroy+18 MILES+IRTF+MIST SSP models and ATLAS response functions
 
 Start by making sure you have "ALFA_OUT", and "ALFA_INFILES" environment variables set:
