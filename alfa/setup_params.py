@@ -46,6 +46,8 @@ def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
                     'jitter':[0.1,10]}
 
     if parameters_to_fit is None:
+        del default_params['alpha']
+        del priors_all['alpha']
         return default_params, priors_all
  
     else:
