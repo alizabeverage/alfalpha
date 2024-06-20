@@ -67,7 +67,7 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
     data.mask = np.array(fitting_info.data_mask)
     data.ires = np.array(fitting_info.data_ires)
     data.fitting_regions = fitting_info.data_fitting_regions
-
+    
     
     grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
 

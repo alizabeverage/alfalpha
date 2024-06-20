@@ -215,8 +215,8 @@ class Ssp():
         self.nstart = 99 # 0.36 um
         self.nend   = 5830 # 1.1um
         
-        if kroupa_shortcut and os.path.isfile(f"{ALFA_INFILES}VCJ_Kroupa_alfalpha.npy"):
-            self.ssp_grid = np.load(f"{ALFA_INFILES}VCJ_Kroupa_alfalpha.npy")
+        if kroupa_shortcut and os.path.isfile(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy"):
+            self.ssp_grid = np.load(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy")
             tmp = np.array(pd.read_csv(f"{ALFA_INFILES}VCJ_v8_mcut0.08_t07.0_Zm0.5.ssp.imf_varydoublex.s100",
                                        delim_whitespace=True, header=None, comment='#'))
             self.wave = tmp[self.nstart:self.nend,0]
@@ -253,7 +253,7 @@ class Ssp():
         self.wave = tmp[self.nstart:self.nend,0]
         
         # save to file
-        np.save(f"{ALFA_INFILES}VCJ_Kroupa_alfalpha.npy",self.ssp_grid)
+        np.save(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy",self.ssp_grid)
 
 
     def set_up_interpolator(self):
