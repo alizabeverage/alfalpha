@@ -8,8 +8,8 @@ Start by making sure you have "ALFA_OUT", and "ALFA_INFILES" environment variabl
 - "ALFA_OUT": Where the output files should be saved
 
 ``` bash
-export ALFA_OUT="/path/to/repo/alfa/outfiles/"
-export ALFA_INFILES="/path/to/repo/alfa/infiles/"
+export ALFA_OUT="/path/to/repo/alfalpha/outfiles/"
+export ALFA_INFILES="/path/to/repo/alfalpha/infiles/"
 
 # if you have the Conroy alf code installed already, this would instead look something like:
 export ALFA_INFILES="/path/to/alf/alf-master/infiles/"
