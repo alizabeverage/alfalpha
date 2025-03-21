@@ -133,8 +133,7 @@ class Grids():
             setattr(self.rfn,col,tmp)
 
     
-    def get_model(self, params, outwave=None):   
-
+    def get_model(self, params, outwave=None): 
         # get SSP corresopnding to age and Z
         spec = 10**self.ssp.ssp_interp([params['logage'],params['zH']])
         
