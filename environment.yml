@@ -1,4 +1,4 @@
-name: astrods
+name: alfa
 
 channels:
 - conda-forge
@@ -7,7 +7,6 @@ dependencies:
 - python=3.9.*
 
 # A linux desktop environment
-- websockify
 
 - numpy==1.22.*
 - matplotlib==3.5.*
@@ -15,19 +14,16 @@ dependencies:
 - psycopg2==2.9.*
 - pytorch>=1.10.0
 - pytorch-lightning
-- pyaudio>=0.2.11
 - cython
 - protobuf
 - mpich
 - mpi4py
 - cartopy
-- mkl-service
-
+- scipy
 - pip
 
 - pip:
   - jupyter-desktop-server==0.1.3
-  - tensorflow>=2.7.*
   - opencv-python>=4.5.5.62
   - nose2>=0.10.0
   - sympy
@@ -61,13 +57,8 @@ dependencies:
   - altair>=4.2.0
   - vega3>=0.13.0
   - pytz>=2021.3
-  - keras==2.8.*
-  - scikeras
-  - keras-preprocessing>=1.1.0
-  - tensorflow-io-gcs-filesystem>=0.23.0
   - lightkurve
   - ipyparallel>=8.1.0
-  - jupyter-tensorboard>=0.2.0
   - line_profiler>-3.4.0
   - snakeviz>=2.1.1
   - memory_profiler>=0.60.0
@@ -79,8 +70,6 @@ dependencies:
   - umap-learn>=0.5.2
   - pydot>=1.4.0
   - TPOT>=0.11.7
-  - tables>=3.7.0
-  - aiohttp>=3.8.1
   - jax
   - watermark
   - autopep8
@@ -100,3 +89,7 @@ dependencies:
   - nb_black
   - pycodestyle_magic
   - twine
+  - dynesty
+  - corner
+  - emcee
+  - pandas
