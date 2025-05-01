@@ -113,20 +113,21 @@ class Grids():
         # smooth ssp grid to instrumental resolution
         for j in range(len(self.ssp.agegrid)):
             for k in range(len(self.ssp.logzgrid)):
-                self.ssp.ssp_grid[:,j,k] = smoothspec(self.ssp.wave,
-                                                        self.ssp.ssp_grid[:,j,k],
-                                                      resolution=resolution,
-                                                     smoothtype=smoothtype)
+                for i in range(len(self.afegrid)):
+                    self.ssp.ssp_grid[:,j,k,i] = smoothspec(self.ssp.wave,
+                                                            self.ssp.ssp_grid[:,j,k,i],
+                                                        resolution=resolution,
+                                                        smoothtype=smoothtype)
 
         # smooth rfn grid to instrumental resolution (loop through elements)
-        for col in self.rfn.rfn_cols_use:
-            tmp = getattr(self.rfn,col)
-            for j in range(len(self.rfn.agegrid)):
-                for k in range(len(self.rfn.logzgrid)):
-                    tmp[:,j,k] = smoothspec(self.rfn.wave, tmp[:,j,k], 
-                                            resolution=resolution,
-                                           smoothtype=smoothtype)
-            setattr(self.rfn,col,tmp)
+        # for col in self.rfn.rfn_cols_use:
+        #     tmp = getattr(self.rfn,col)
+        #     for j in range(len(self.rfn.agegrid)):
+        #         for k in range(len(self.rfn.logzgrid)):
+        #             tmp[:,j,k] = smoothspec(self.rfn.wave, tmp[:,j,k], 
+        #                                     resolution=resolution,
+        #                                    smoothtype=smoothtype)
+        #    setattr(self.rfn,col,tmp)
 
     
     def get_model(self, params, outwave=None):   

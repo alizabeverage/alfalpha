@@ -84,7 +84,6 @@ dependencies:
   - fire
   - pycodestyle
   - flake8
-  - nb_black
   - pycodestyle_magic
   - twine
   - dynesty
