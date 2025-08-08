@@ -2,6 +2,15 @@ import numpy as np
 from numpy.polynomial.chebyshev import Chebyshev as C
 from scipy.interpolate import interp1d
 
+def get_grids_class(model_name):
+    if model_name == 'sMILES':
+        from alfa.grids_sMILES import Grids
+    elif model_name == 'Conroy18':
+        from alfa.grids import Grids
+    else:
+        raise ValueError(f"Unknown model: {model_name}")
+    return Grids
+
 def remap_array(data, mapping=[0,1], vmax=None, vmin=None):
     data = np.array(data)
     if vmax is None: vmax = max(data)

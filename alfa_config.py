@@ -1,4 +1,3 @@
-from alfa.grids import *
 from alfa.read_data import Data
 from alfa.polynorm import polynorm
 import numpy as np
@@ -13,6 +12,7 @@ from alfa.post_process import post_process
 from dynesty import DynamicNestedSampler
 import pickle
 import time
+from alfa.utils import get_grids_class
 
 
 '''
@@ -30,7 +30,11 @@ ALFA_OUT = os.environ['ALFA_OUT']
 fitting_info = Info()
 
 # which sampler do you want to use?
-fitting_info.sampler = 'dynesty' # 'dynesty' or 'emcee'
+fitting_info.sampler = 'dynesty_test' # 'dynesty' or 'emcee'
+fitting_info.model = 'Conroy18' # 'sMILES' or 'Conroy18'
+
+# import correct model grids
+Grids = get_grids_class(fitting_info.model)
 
 if fitting_info.sampler == 'emcee':
     # emcee parameters
@@ -42,20 +46,27 @@ if fitting_info.sampler == 'emcee':
 # which parameters (if any) do you want to "pre-fit"?
 # if diff_ev_parameters is empty, then the code will skip this step
 fitting_info.diff_ev_parameters = ['velz','sigma','logage','zH']
+if fitting_info.model == 'sMILES': fitting_info.diff_ev_parameters.append('afe')
 
 # which parameters do you want to fit?
 # you are required to have at least 'velz', 'sigma', 'zH', and 'feh' in the list
 # if you want to fit emission lines, you include which line (e.g., 'logemline_h')
 # *and* 'velz2' and 'sigma2'
-fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
+if fitting_info.model == 'Conroy18':
+    fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'feh',
                                         'ch', 'nh', 'mgh', 'nah', 'ah', 'sih', 'cah',
                                         'tih', 'crh', 'teff','jitter',
+                                        'logemline_h', 'logemline_oiii',
+                                        'velz2', 'sigma2'])
+    
+elif fitting_info.model == 'sMILES':
+    fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'afe','jitter',
                                         'logemline_h', 'logemline_oiii',
                                         'velz2', 'sigma2'])
 
 
 # initialize priors
-_, fitting_info.priors = setup_params(fitting_info.parameters_to_fit)
+_, fitting_info.priors = setup_params(fitting_info.parameters_to_fit,model=fitting_info.model)
 
 # you can alter the prior ranges here, but they're already set in Info() by "setup_params"
 fitting_info.priors['feh'] = [-0.5,0.5]
@@ -228,11 +239,32 @@ if __name__ == "__main__":
 
         with open(f'{fitting_info.ALFA_OUT}{fitting_info.filename}.pkl', 'wb') as f:
             pickle.dump(res, f)
+
+    elif fitting_info.sampler == 'dynesty_test':
+        dsampler = DynamicNestedSampler(
+            loglikelihood_dynesty,
+            prior_transform,
+            len(fitting_info.parameters_to_fit),
+            nlive=50  # default is 500; this is a quick test value
+        )
+
+        t0 = time.time()
+        dsampler.run_nested(dlogz_init=10.0, maxiter=200)  # stop early
+        t1 = time.time()
+
+        timedynesty = (t1-t0)
+        
+        print("Time taken to run 'dynesty' (in static mode) is {} seconds".format(timedynesty))
+
+        res = dsampler.results # get results dictionary from sampler
+
+        with open(f'{fitting_info.ALFA_OUT}{fitting_info.filename}.pkl', 'wb') as f:
+            pickle.dump(res, f)
     
 
     #~~~~~~~~~~~~~~~~~~~~~ post processing ~~~~~~~~~~~~~~~~~~~~~~~ #
     
-    post_process(fitting_info, plot_corner=True, plot_bestspec=True)
+    post_process(fitting_info, plot_corner=False, plot_bestspec=True)
 
 
 

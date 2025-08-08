@@ -113,7 +113,7 @@ class Grids():
         # smooth ssp grid to instrumental resolution
         for j in range(len(self.ssp.agegrid)):
             for k in range(len(self.ssp.logzgrid)):
-                for i in range(len(self.afegrid)):
+                for i in range(len(self.ssp.afegrid)):
                     self.ssp.ssp_grid[:,j,k,i] = smoothspec(self.ssp.wave,
                                                             self.ssp.ssp_grid[:,j,k,i],
                                                         resolution=resolution,

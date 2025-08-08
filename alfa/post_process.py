@@ -4,7 +4,6 @@ import corner
 import numpy as np
 from alfa.setup_params import get_properties
 from alfa.fitting_info import Info
-from alfa.grids import Grids
 from alfa.read_data import Data
 from alfa.polynorm import polynorm
 from alfa.utils import correct_abundance
@@ -12,6 +11,7 @@ import pandas as pd
 import pickle
 from dynesty.utils import resample_equal
 from scipy.stats import gaussian_kde
+from alfa.utils import get_grids_class
 
 
 def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bestspec=True):
@@ -29,7 +29,7 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
         reader = emcee.backends.HDFBackend(f"{fitting_info.ALFA_OUT}{fitting_info.filename}.h5")
         flat_samples = reader.get_chain(discard=fitting_info.nsteps-fitting_info.nsteps_save, thin=1, flat=True)
 
-    elif fitting_info.sampler == 'dynesty':
+    elif (fitting_info.sampler == 'dynesty')|(fitting_info.sampler == 'dynesty_test'):
         with open(f'{fitting_info.ALFA_OUT}{fitting_info.filename}.pkl', 'rb') as f:
             res = pickle.load(f)
         
@@ -68,7 +68,8 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
     data.ires = np.array(fitting_info.data_ires)
     data.fitting_regions = fitting_info.data_fitting_regions
     
-    
+    # import correct model grid
+    Grids = get_grids_class(fitting_info.model)
     grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
 
     if plot_bestspec:
@@ -122,11 +123,14 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
     # save outputs in summary file
     fitting_info.parameters_to_fit = np.array(fitting_info.parameters_to_fit)
     dict_results = {}
-    # define Fe for retrieving [X/Fe]
-    Fe = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
-                                        flat_samples[:,fitting_info.parameters_to_fit=='feh'].ravel(),'feh')
-    Mg = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
+
+    if fitting_info.model == 'Conroy18':
+        # define Fe for retrieving [X/Fe]
+        Fe = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
+                                            flat_samples[:,fitting_info.parameters_to_fit=='feh'].ravel(),'feh')
+        Mg = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
                                         flat_samples[:,fitting_info.parameters_to_fit=='mgh'].ravel(),'mgh')
+    
     for i,param in enumerate(fitting_info.parameters_to_fit):
         dict_results[param+'16'] = [np.percentile(flat_samples[:,i],16)]
         dict_results[param+'50'] = [np.median(flat_samples[:,i])]
@@ -154,17 +158,18 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
             dict_results[param_st+'50'] = [np.median(dist-Mg)]
             dict_results[param_st+'84'] = [np.percentile(dist-Mg,84)]
     
-    # add the "metallicity" [Z/H] as defined in Thomas et al. 2003
-    mgh = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
-                            flat_samples[:,fitting_info.parameters_to_fit=='mgh'].ravel(),'mgh')
-    feh = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
-                            flat_samples[:,fitting_info.parameters_to_fit=='feh'].ravel(),'feh')
-    mgfe = mgh-feh
+    if fitting_info.model == 'Conroy18':
+        # add the "metallicity" [Z/H] as defined in Thomas et al. 2003
+        mgh = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
+                                flat_samples[:,fitting_info.parameters_to_fit=='mgh'].ravel(),'mgh')
+        feh = correct_abundance(flat_samples[:,fitting_info.parameters_to_fit=='zH'].ravel(),
+                                flat_samples[:,fitting_info.parameters_to_fit=='feh'].ravel(),'feh')
+        mgfe = mgh-feh
 
-    zh = np.array(feh + 0.94*mgfe)
-    dict_results['[Z/H]_thomas16'] = [np.percentile(zh,16)]
-    dict_results['[Z/H]_thomas50'] = [np.median(zh)]
-    dict_results['[Z/H]_thomas84'] = [np.percentile(zh,84)]
+        zh = np.array(feh + 0.94*mgfe)
+        dict_results['[Z/H]_thomas16'] = [np.percentile(zh,16)]
+        dict_results['[Z/H]_thomas50'] = [np.median(zh)]
+        dict_results['[Z/H]_thomas84'] = [np.percentile(zh,84)]
     
     df = pd.DataFrame.from_dict(dict_results)
     np.savetxt(

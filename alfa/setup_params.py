@@ -1,6 +1,6 @@
 import numpy as np
 #
-def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
+def setup_params(parameters_to_fit=None,default_priors=False,model='Conroy18'):
     
     default_params = {'velz':0, 'sigma':150, 'logage':0.4, 'zH':0,
                      'feh':0, 'alpha':0, 'ah':0, 'ch':0, 'nh':0, 'nah':0, 'mgh':0, 'sih':0,
@@ -9,7 +9,7 @@ def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
                     'logemline_h':-4, 'logemline_ni':-4, 'logemline_nii':-4, 'logemline_oii':-4,
                    'logemline_oiii':-4, 'logemline_sii':-4, 'velz2':0, 'sigma2':200,'teff':0,
                      'jitter':1,'afe':0}
-    if default_priors&(model=='conroy18'):
+    if default_priors&(model=='Conroy18'):
         priors_all = {'velz':[-200,200], 'sigma':[100,500], 'logage':[-0.1,1.2], 'zH':[-1.5,0.2],
                       'alpha':[-0.3,0.3],
                     'feh':[-0.3,0.3], 'ah':[-0.3,0.3], 'ch':[-0.15,0.15], 
@@ -21,7 +21,7 @@ def setup_params(parameters_to_fit=None,default_priors=False,model='conroy18'):
                     'logemline_nii':[-6,1], 'logemline_oii':[-6,1], 'logemline_oiii':[-6,1],
                     'logemline_sii':[-6,1], 'velz2':[-200,200], 'sigma2':[50,1000],'teff':[-80,80],
                     'jitter':[0.1,10]}
-    elif ~default_priors&(model=='conroy18'):
+    elif ~default_priors&(model=='Conroy18'):
         # Heavy Metal -- limit age, extend mgh, feh, zh 'logage':[-0.1,0.8], 'zH':[-1.5,0.2]
         priors_all = {'velz':[-500,500], 'sigma':[100,500], 'logage':[-0.1,1.13], 'zH':[-1.5,0.3],
                     'alpha':[-0.5,0.5],
