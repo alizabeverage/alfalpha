@@ -59,7 +59,7 @@ class Grids():
         self.ssp = Ssp()
 
         # smooth all grids to instrumental resolution
-        self.model_res = 100 # km/s
+        self.model_res = 2.5/inst_res_wave * ckms # km/s
         self.inst_res = inst_res
         self.inst_res_wave = inst_res_wave
 
@@ -142,7 +142,7 @@ class Grids():
 
         # smooth to desired sigma
         spec = smoothspec(self.ssp.wave, spec,
-                            inres=100,resolution=params['sigma'])
+                            inres=np.average(self.model_res),resolution=params['sigma'])
 
         # redshift the model and interpolate to data wavelength
         oneplusz = (1+params['velz']/ckms)

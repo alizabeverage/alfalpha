@@ -169,7 +169,7 @@ class Grids():
 
         # smooth to desired sigma
         spec = smoothspec(self.ssp.wave, spec,
-                            inres=100,resolution=params['sigma'])
+                            inres=self.model_res,resolution=params['sigma'])
 
         # redshift the model and interpolate to data wavelength
         oneplusz = (1+params['velz']/ckms)

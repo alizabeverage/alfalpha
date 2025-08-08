@@ -31,7 +31,7 @@ fitting_info = Info()
 
 # which sampler do you want to use?
 fitting_info.sampler = 'dynesty_test' # 'dynesty' or 'emcee'
-fitting_info.model = 'Conroy18' # 'sMILES' or 'Conroy18'
+fitting_info.model = 'sMILES' # 'sMILES' or 'Conroy18'
 
 # import correct model grids
 Grids = get_grids_class(fitting_info.model)
