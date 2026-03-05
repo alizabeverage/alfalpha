@@ -16,7 +16,7 @@ class Data():
             return
 
         tmp = np.array(pd.read_csv(f"{self.filename}.dat",
-                                       delim_whitespace=True, header=None, comment='#'))
+                             sep='\s+', header=None, comment='#'))
         self.wave = tmp[:,0]
         self.flux = tmp[:,1]
         self.err = tmp[:,2]
