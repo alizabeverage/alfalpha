@@ -217,7 +217,7 @@ class Ssp():
         if kroupa_shortcut and os.path.isfile(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy"):
             self.ssp_grid = np.load(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy")
             tmp = np.array(pd.read_csv(f"{ALFA_INFILES}VCJ_v8_mcut0.08_t07.0_Zm0.5.ssp.imf_varydoublex.s100",
-                                       delim_whitespace=True, header=None, comment='#'))
+                                       sep=r'\s+', header=None, comment='#'))
             self.wave = tmp[self.nstart:self.nend,0]
         
         else:
@@ -247,7 +247,7 @@ class Ssp():
                 else: mp = 'p'
                 filename = f"{ALFA_INFILES}VCJ_v8_mcut0.08_t{t:04.1f}"\
                                 f"_Z{mp}{np.abs(z):.1f}.ssp.imf_varydoublex.s100"
-                tmp = np.array(pd.read_csv(filename, delim_whitespace=True, header=None, comment='#'))
+                tmp = np.array(pd.read_csv(filename, sep=r'\s+', header=None, comment='#'))
                 self.ssp_grid[:,j,k] = tmp[self.nstart:self.nend, self.kroupa_index+1]
         self.wave = tmp[self.nstart:self.nend,0]
         
@@ -306,7 +306,7 @@ class Rfn():
                 if z==0.25: z=0.0 
                 filename = f"{ALFA_INFILES}/atlas_ssp_t{t:02}"\
                                     f"_Z{mp}{np.abs(z):.1f}.abund.krpa.s100"
-                tmp = np.array(pd.read_csv(filename, delim_whitespace=True, header=None, comment='#'))
+                tmp = np.array(pd.read_csv(filename, sep=r'\s+', header=None, comment='#'))
                 
                 
                 for i, col in enumerate(self.rfn_cols):
