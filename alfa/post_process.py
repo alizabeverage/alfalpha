@@ -82,7 +82,7 @@ def post_process(fitting_info = None, fname = None, plot_corner=True, plot_bests
             mflux = grids.get_model(params,outwave=data.wave)
         
             #poly norm
-            poly, mfluxnorm, data_r = polynorm(data, mflux,return_data=True)
+            poly, mfluxnorm, data_r = polynorm(data, mflux, deg=fitting_info.poly_degree, return_data=True)
             plt.plot(data.wave,data_r, 'C0', lw=1)
             plt.plot(data.wave,mfluxnorm, 'C1')
             
