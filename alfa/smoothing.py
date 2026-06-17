@@ -96,8 +96,8 @@ def smoothspec(wave, spec, resolution=None, outwave=None,
         sigma = resolution
         fwhm = sigma * sigma_to_fwhm
         if sigma == 0.0:
-            Rsigma = np.infty
-            R = np.infty
+            Rsigma = np.inf
+            R = np.inf
         else:
             Rsigma = ckms / sigma
             R = ckms / fwhm

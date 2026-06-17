@@ -33,6 +33,9 @@ fitting_info = Info()
 fitting_info.sampler = 'dynesty_test' # 'dynesty' or 'emcee'
 fitting_info.model = 'sMILES' # 'sMILES' or 'Conroy18'
 
+# fit the low-mass IMF slopes (imf1, imf2)? only supported for Conroy18
+fitting_info.imf_vary = False
+
 # import correct model grids
 Grids = get_grids_class(fitting_info.model)
 
@@ -58,6 +61,8 @@ if fitting_info.model == 'Conroy18':
                                         'tih', 'crh', 'teff','jitter',
                                         'logemline_h', 'logemline_oiii',
                                         'velz2', 'sigma2'])
+    if fitting_info.imf_vary:
+        fitting_info.parameters_to_fit = np.append(fitting_info.parameters_to_fit, ['imf1', 'imf2'])
     
 elif fitting_info.model == 'sMILES':
     fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'afe','jitter',
@@ -184,7 +189,8 @@ if __name__ == "__main__":
 
     # set up grid object
     print(f"Loading grids...")
-    grids = Grids(inst_res=data.ires,inst_res_wave=data.wave,kroupa_shortcut=False)
+    grids = Grids(inst_res=data.ires, inst_res_wave=data.wave, kroupa_shortcut=False,
+                  imf_vary=fitting_info.imf_vary)
 
     #~~~~~~~~~~~~~~~~~~~~~ run differential evolution and setup initial positions ~~~~~~~~~~~~~~~~~~ #
     

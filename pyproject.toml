@@ -15,7 +15,14 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Astronomy"
 ]
 dynamic = ["version"]
-dependencies = ["numpy", "astropy","scipy"]
+dependencies = [
+    "numpy",
+    "astropy",
+    "scipy",
+    "ipykernel>=6.16.2",
+    "ipython>=7.34.0",
+    "pandas>=1.1.5",
+]
 
 
 

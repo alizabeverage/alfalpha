@@ -31,31 +31,31 @@ emnormall = np.array([1./11.21, 1./6.16, 1./2.87, 1./3.,
 class Grids():
     '''
     Initialize the grids object
-    
+
     Ssp: read in the SSPs and (as of now) select only the Kroupa IMF
         --> "kroupa_shortcut": read in .npy file with grid already sorted
-        --> ssp.ssp_grid: the grid [spectrum, age, metal]
-        --> ssp.agegrid: the age array 
-        --> ssp.logzgrid: the metal array 
+        --> ssp.ssp_grid: the grid [spectrum, age, metal] or [spectrum, imf1, imf2, age, metal]
+        --> ssp.agegrid: the age array
+        --> ssp.logzgrid: the metal array
         --> ssp.wave: wavelengths corresponding to spectra
         --> ssp.ssp_interp: interpolant function for ssp_grid
-                e.g., ssp.ssp_interp(age,Z)
+                e.g., ssp.ssp_interp(age,Z) or ssp.ssp_interp(imf1,imf2,age,Z)
 
     Rfn: read in the response functions for a Kroupa IMF
-        --> rfn.[element][m or p]: a grid [spectrum, age, metal] of 
+        --> rfn.[element][m or p]: a grid [spectrum, age, metal] of
                 response spectra for given element
-        --> rfn.agegrid: the age array 
-        --> rfn.logzgrid: the metal array 
+        --> rfn.agegrid: the age array
+        --> rfn.logzgrid: the metal array
         --> rfn.wave: wavelengths corresponding to spectra
         --> rfn.[element][p/m]: the response function for +/-0.3
         --> rfn.[element]_interp: interpolant function
                 e.g., rfn.mg_interp(age,Z,abund)
-                
+
     Eventually: add nuisance parameters (skylines, atm transmission, hot stars, M7III stars)
     '''
-    
-    def __init__(self,kroupa_shortcut=True,inst_res=0,inst_res_wave=None):
-        self.ssp = Ssp(kroupa_shortcut=kroupa_shortcut)
+
+    def __init__(self,kroupa_shortcut=True,inst_res=0,inst_res_wave=None,imf_vary=False):
+        self.ssp = Ssp(kroupa_shortcut=kroupa_shortcut, imf_vary=imf_vary)
         self.rfn = Rfn()
 
         # smooth all grids to instrumental resolution
@@ -115,12 +115,22 @@ class Grids():
             resolution = self.inst_res*self.ssp.wave/ckms
 
         # smooth ssp grid to instrumental resolution
-        for j in range(len(self.ssp.agegrid)):
-            for k in range(len(self.ssp.logzgrid)):
-                self.ssp.ssp_grid[:,j,k] = smoothspec(self.ssp.wave,
-                                                        self.ssp.ssp_grid[:,j,k],
-                                                      resolution=resolution,
-                                                     smoothtype=smoothtype)
+        if self.ssp.imf_vary:
+            for i1 in range(len(self.ssp.imfgrid)):
+                for i2 in range(len(self.ssp.imfgrid)):
+                    for j in range(len(self.ssp.agegrid)):
+                        for k in range(len(self.ssp.logzgrid)):
+                            self.ssp.ssp_grid[:,i1,i2,j,k] = smoothspec(self.ssp.wave,
+                                                                self.ssp.ssp_grid[:,i1,i2,j,k],
+                                                                resolution=resolution,
+                                                                smoothtype=smoothtype)
+        else:
+            for j in range(len(self.ssp.agegrid)):
+                for k in range(len(self.ssp.logzgrid)):
+                    self.ssp.ssp_grid[:,j,k] = smoothspec(self.ssp.wave,
+                                                            self.ssp.ssp_grid[:,j,k],
+                                                          resolution=resolution,
+                                                         smoothtype=smoothtype)
 
         # smooth rfn grid to instrumental resolution (loop through elements)
         for col in self.rfn.rfn_cols_use:
@@ -133,9 +143,13 @@ class Grids():
             setattr(self.rfn,col,tmp)
 
     
-    def get_model(self, params, outwave=None): 
-        # get SSP corresopnding to age and Z
-        spec = 10**self.ssp.ssp_interp([params['logage'],params['zH']])
+    def get_model(self, params, outwave=None):
+        # get SSP corresponding to age and Z (and optionally IMF slopes)
+        if self.ssp.imf_vary:
+            spec = 10**self.ssp.ssp_interp([params['imf1'], params['imf2'],
+                                            params['logage'], params['zH']])
+        else:
+            spec = 10**self.ssp.ssp_interp([params['logage'],params['zH']])
         
         # fit elements in lockstep if "alpha" is in the parameter dictionary
         if 'alpha' in params.keys():
@@ -206,22 +220,39 @@ class Grids():
 
     
 class Ssp():
-    def __init__(self, kroupa_shortcut=True):            
+    def __init__(self, kroupa_shortcut=True, imf_vary=False):
+        self.imf_vary = imf_vary
         self.agegrid = np.array([1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.5])
         self.logagegrid = np.log10(self.agegrid)
         self.logzgrid = np.array([-1.5, -1.0, -0.5, 0.0, 0.25])
-        self.get_kroupa_index()
         self.nstart = 99 # 0.36 um
         self.nend   = 5830 # 1.1um
-        
-        if kroupa_shortcut and os.path.isfile(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy"):
-            self.ssp_grid = np.load(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy")
-            tmp = np.array(pd.read_csv(f"{ALFA_INFILES}VCJ_v8_mcut0.08_t07.0_Zm0.5.ssp.imf_varydoublex.s100",
-                                       sep=r'\s+', header=None, comment='#'))
-            self.wave = tmp[self.nstart:self.nend,0]
-        
+
+        # IMF grid: 14 usable slopes from 0.9 to 3.5 in steps of 0.2
+        # (nimfoff=2 skips the first two entries of the 16-point file grid)
+        self.nimfoff = 2
+        self.imfgrid = np.array([0.5 + (i - 1 + self.nimfoff) / 5 for i in range(1, 15)])
+
+        if imf_vary:
+            cache = f"{ALFA_INFILES}VCJ_IMF_grid_alfa.npy"
+            if kroupa_shortcut and os.path.isfile(cache):
+                self.ssp_grid = np.load(cache)
+                tmp = np.array(pd.read_csv(
+                    f"{ALFA_INFILES}VCJ_v8_mcut0.08_t07.0_Zm0.5.ssp.imf_varydoublex.s100",
+                    sep=r'\s+', header=None, comment='#'))
+                self.wave = tmp[self.nstart:self.nend, 0]
+            else:
+                self.populate_imf_grid()
         else:
-            self.populate_grid() #makes self.empirical_spectra
+            self.get_kroupa_index()
+            if kroupa_shortcut and os.path.isfile(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy"):
+                self.ssp_grid = np.load(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy")
+                tmp = np.array(pd.read_csv(
+                    f"{ALFA_INFILES}VCJ_v8_mcut0.08_t07.0_Zm0.5.ssp.imf_varydoublex.s100",
+                    sep=r'\s+', header=None, comment='#'))
+                self.wave = tmp[self.nstart:self.nend, 0]
+            else:
+                self.populate_grid()
 
 
     def get_kroupa_index(self):
@@ -237,6 +268,28 @@ class Ssp():
         self.kroupa_index = imfr1*(len(imfgrid)+nimfoff)+imfr2 #should be 73
 
     
+    def populate_imf_grid(self):
+        '''Load full IMF grid: shape (nl, nimf1, nimf2, nage, nzmet).
+        Column index in the file: (i1+nimfoff)*16 + (i2+nimfoff), 0-indexed after the wavelength column.
+        '''
+        nimf = len(self.imfgrid)
+        nfile = nimf + self.nimfoff  # = 16
+        nl = self.nend - self.nstart
+        self.ssp_grid = np.zeros([nl, nimf, nimf, len(self.agegrid), len(self.logzgrid)])
+        for j, t in enumerate(self.agegrid):
+            for k, z in enumerate(self.logzgrid):
+                if z < 0: mp = 'm'
+                else: mp = 'p'
+                filename = (f"{ALFA_INFILES}VCJ_v8_mcut0.08_t{t:04.1f}"
+                            f"_Z{mp}{np.abs(z):.1f}.ssp.imf_varydoublex.s100")
+                tmp = np.array(pd.read_csv(filename, sep=r'\s+', header=None, comment='#'))
+                for i1 in range(nimf):
+                    for i2 in range(nimf):
+                        col = (i1 + self.nimfoff) * nfile + (i2 + self.nimfoff)
+                        self.ssp_grid[:, i1, i2, j, k] = tmp[self.nstart:self.nend, col + 1]
+        self.wave = tmp[self.nstart:self.nend, 0]
+        np.save(f"{ALFA_INFILES}VCJ_IMF_grid_alfa.npy", self.ssp_grid)
+
     def populate_grid(self):
         self.ssp_grid = np.zeros([self.nend-self.nstart,
                                            len(self.agegrid),
@@ -256,12 +309,17 @@ class Ssp():
 
 
     def set_up_interpolator(self):
-        # Here you take the log of the grid before interpolating!!
-        # Interpolate in log-space!! 
-        # This was an annoying bug.
-        self.ssp_interp = RegularGridInterpolator((self.logagegrid, self.logzgrid), 
-                        np.transpose(np.log10(self.ssp_grid), (1,2,0)), 
-                    method='linear', bounds_error=False, fill_value=None)
+        # Interpolate in log-space (important — was an annoying bug)
+        if self.imf_vary:
+            # grid shape: (nl, nimf1, nimf2, nage, nzmet) → transpose to (nimf1, nimf2, nage, nzmet, nl)
+            self.ssp_interp = RegularGridInterpolator(
+                (self.imfgrid, self.imfgrid, self.logagegrid, self.logzgrid),
+                np.transpose(np.log10(self.ssp_grid), (1, 2, 3, 4, 0)),
+                method='linear', bounds_error=False, fill_value=None)
+        else:
+            self.ssp_interp = RegularGridInterpolator((self.logagegrid, self.logzgrid),
+                            np.transpose(np.log10(self.ssp_grid), (1,2,0)),
+                        method='linear', bounds_error=False, fill_value=None)
 
 
 

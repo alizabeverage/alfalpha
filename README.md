@@ -69,6 +69,24 @@ print(t2-t1)
 ```
 
 
+### IMF variation
+
+By default, alfalpha fixes the IMF to Kroupa (imf1=1.3, imf2=2.3). To fit the low-mass IMF slopes as free parameters, set `fitting_info.imf_vary = True` in `alfa_config.py`. This is only supported for the Conroy18 model.
+
+The IMF is parameterized as a broken power law following alf (Conroy & van Dokkum 2012):
+- **imf1**: slope for 0.08–0.5 M☉ (Kroupa: 1.3)
+- **imf2**: slope for 0.5–1.0 M☉ (Kroupa: 2.3)
+
+Both slopes are fit over the range [0.9, 3.5]. A bottom-heavy IMF has steeper slopes (higher values); a Salpeter IMF has imf1=imf2=2.35.
+
+On first run with `imf_vary=True`, alfalpha loads the full 14×14 IMF grid from the VCJ SSP files (~300 MB) and caches it to `$ALFA_INFILES/VCJ_IMF_grid_alfa.npy`. Subsequent runs load from the cache.
+
+```python
+# in alfa_config.py
+fitting_info.model = 'Conroy18'
+fitting_info.imf_vary = True  # adds imf1 and imf2 to parameters_to_fit automatically
+```
+
 ### The alf_config.py file
 
 ```alf_config.py``` is how users control the fitting settings. In this script, users can specify fitting parameters, prior ranges, and which sampler they want to use (along with sampler-specific parameters). All of these specifications are held in an instantiation of the ```Info()``` class and saved to the outfiles directory as a .json file so that users can remember which settings were used.
