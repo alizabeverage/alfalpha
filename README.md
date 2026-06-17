@@ -46,7 +46,7 @@ import time
 import numpy as np
 
 # load the model grid
-g = Grids()
+g = Grids(imf_vary=True)
 
 # define the parameters you care about
 parameters_to_fit=['velz','sigma','logage','zH','feh','mgh','ch','jitter']
