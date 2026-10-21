@@ -37,5 +37,10 @@ packages = ["alfa"]
 requires = ["setuptools>=42", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
+[dependency-groups]
+dev = [
+    "build>=1.1.1",
+]
+
 [tool.setuptools_scm]
 write_to = "alfa/_version.py"

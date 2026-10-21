@@ -38,7 +38,9 @@ def polynorm(data_obj, model, return_data=False, deg=None):
         s = (data_obj.wave >= region[0])&(data_obj.wave <= region[1])
         
         # one degree for every 100 AA
-        polydegree = math.ceil(np.diff(region)/100)
+        # (np.diff returns a length-1 array; .item() keeps math.ceil working
+        #  on numpy>=2, where ceil of a 1-element array raises)
+        polydegree = math.ceil(np.diff(region).item()/100)
         if polydegree>=14: polydegree = 14
         if deg is not None: polydegree = deg
             

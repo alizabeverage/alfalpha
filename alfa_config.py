@@ -30,11 +30,19 @@ ALFA_OUT = os.environ['ALFA_OUT']
 fitting_info = Info()
 
 # which sampler do you want to use?
-fitting_info.sampler = 'dynesty_test' # 'dynesty' or 'emcee'
+fitting_info.sampler = 'dynesty_test' # 'dynesty', 'emcee' or 'nuts'
 fitting_info.model = 'sMILES' # 'sMILES' or 'Conroy18'
 
 # fit the low-mass IMF slopes (imf1, imf2)? only supported for Conroy18
 fitting_info.imf_vary = False
+
+# two-process-constrained abundance mode (Conroy18 only): fit (zH, feh, mgh)
+# + kinematics/age/emission/jitter and slave every other element to the
+# two-process model. See alfa/two_process_mode.py and ALFALPHA_TP.md.
+# two_process_config: None for defaults, or a dict, e.g.
+#   {'mgfe_pl':0.65,'c_max_exponent':1.0,'n_valid_mgh':[-0.5,0.15]}
+fitting_info.two_process_mode = False
+fitting_info.two_process_config = None
 
 # import correct model grids
 Grids = get_grids_class(fitting_info.model)
@@ -45,6 +53,16 @@ if fitting_info.sampler == 'emcee':
     fitting_info.nsteps = 50 #8000
     fitting_info.nsteps_save = 10#100
 
+
+# 'nuts': gradient-based NUTS on the JAX forward model (alfa/nuts_sampler.py; Conroy18 only, no
+# two-process mode). ~3 min per spectrum on a laptop for 20 parameters. Settings:
+fitting_info.nuts_warmup = 500      # adaptation steps per chain
+fitting_info.nuts_draws = 1000      # kept draws per chain
+fitting_info.nuts_chains = 2        # >= 2 for an R-hat convergence check
+fitting_info.nuts_starts = 32       # L-BFGS-B climbs before sampling (basin check); chains start at the best
+fitting_info.nuts_poly = 'marginal' # continuum polynomial: 'marginal' (integrated out), 'profile' (alf), 'sample'
+fitting_info.nuts_dense = False     # dense mass matrix (needed for nuts_poly='sample')
+fitting_info.nuts_seed = 0
 
 # which parameters (if any) do you want to "pre-fit"?
 # if diff_ev_parameters is empty, then the code will skip this step
@@ -66,6 +84,16 @@ if fitting_info.model == 'Conroy18':
     
 elif fitting_info.model == 'sMILES':
     fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH', 'afe','jitter',
+                                        'logemline_h', 'logemline_oiii',
+                                        'velz2', 'sigma2'])
+
+# two-process mode overrides the element list: only (zH, feh, mgh) are fit;
+# all other elements are slaved inside the forward model.
+if fitting_info.two_process_mode:
+    assert fitting_info.model == 'Conroy18', "two-process mode requires model='Conroy18'"
+    assert not fitting_info.imf_vary, "two-process mode + imf_vary not supported"
+    fitting_info.parameters_to_fit = np.array(['velz', 'sigma', 'logage', 'zH',
+                                        'feh', 'mgh', 'jitter',
                                         'logemline_h', 'logemline_oiii',
                                         'velz2', 'sigma2'])
 
@@ -189,8 +217,15 @@ if __name__ == "__main__":
 
     # set up grid object
     print(f"Loading grids...")
-    grids = Grids(inst_res=data.ires, inst_res_wave=data.wave, kroupa_shortcut=False,
-                  imf_vary=fitting_info.imf_vary)
+    if fitting_info.two_process_mode:
+        from alfa.two_process_mode import TwoProcessConfig
+        _tp_config = TwoProcessConfig.from_dict(fitting_info.two_process_config)
+        grids = Grids(inst_res=data.ires, inst_res_wave=data.wave, kroupa_shortcut=False,
+                      imf_vary=fitting_info.imf_vary,
+                      two_process_mode=True, two_process_config=_tp_config)
+    else:
+        grids = Grids(inst_res=data.ires, inst_res_wave=data.wave, kroupa_shortcut=False,
+                      imf_vary=fitting_info.imf_vary)
 
     #~~~~~~~~~~~~~~~~~~~~~ run differential evolution and setup initial positions ~~~~~~~~~~~~~~~~~~ #
     
@@ -245,6 +280,12 @@ if __name__ == "__main__":
 
         with open(f'{fitting_info.ALFA_OUT}{fitting_info.filename}.pkl', 'wb') as f:
             pickle.dump(res, f)
+
+    elif fitting_info.sampler == 'nuts':
+        from alfa.nuts_sampler import run_nuts
+        t0 = time.time()
+        run_nuts(fitting_info, data, grids)
+        print("Time taken to run 'nuts' is {:.0f} seconds".format(time.time() - t0))
 
     elif fitting_info.sampler == 'dynesty_test':
         dsampler = DynamicNestedSampler(

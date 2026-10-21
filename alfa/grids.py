@@ -54,9 +54,23 @@ class Grids():
     Eventually: add nuisance parameters (skylines, atm transmission, hot stars, M7III stars)
     '''
 
-    def __init__(self,kroupa_shortcut=True,inst_res=0,inst_res_wave=None,imf_vary=False):
+    def __init__(self,kroupa_shortcut=True,inst_res=0,inst_res_wave=None,imf_vary=False,
+                 two_process_mode=False,two_process_config=None):
         self.ssp = Ssp(kroupa_shortcut=kroupa_shortcut, imf_vary=imf_vary)
         self.rfn = Rfn()
+
+        # two-process-constrained abundance mode (see alfa/two_process_mode.py).
+        # When on, get_model derives every element response from (zH, feh, mgh);
+        # all other elements are slaved. Standard mode leaves this False and is
+        # completely untouched.
+        self.two_process_mode = two_process_mode
+        self.two_process_config = two_process_config
+        self._last_tp_info = None
+        if self.two_process_mode:
+            from alfa.two_process_mode import describe_mapping, TwoProcessConfig
+            if self.two_process_config is None:
+                self.two_process_config = TwoProcessConfig()
+            print(describe_mapping(self.two_process_config))
 
         # smooth all grids to instrumental resolution
         self.model_res = 100 # km/s
@@ -144,6 +158,21 @@ class Grids():
 
     
     def get_model(self, params, outwave=None):
+        # TWO-PROCESS MODE: derive every element response from (zH, feh, mgh)
+        # and inject them so the standard element loop below applies them via
+        # the shipped response functions, unchanged. feh/mgh are OFFSETS on the
+        # library; delta_Fe == feh, delta_Mg == mgh - lib_mgfe(zH); all other
+        # elements are slaved (see alfa/two_process_mode.py).
+        if getattr(self, "two_process_mode", False):
+            from alfa.two_process_mode import compute_deltas
+            deltas, tp_info = compute_deltas(
+                params["zH"], params.get("feh", 0.0), params.get("mgh", 0.0),
+                self.two_process_config)
+            self._last_tp_info = tp_info
+            # overwrite/insert the element responses; kinematics, age, emission,
+            # jitter, etc. pass through untouched.
+            params = {**params, **deltas}
+
         # get SSP corresponding to age and Z (and optionally IMF slopes)
         if self.ssp.imf_vary:
             spec = 10**self.ssp.ssp_interp([params['imf1'], params['imf2'],
@@ -219,22 +248,39 @@ class Grids():
         
 
     
+# Wavelength window read from the VCJ / ATLAS model files (row indices).
+# alf uses nstart=100, nend=5830 (0.36-1.10 um). The files run to row 10566
+# (2.5 um); NEND = 10566 reads everything, which is needed for rest-frame
+# 1.1-1.25 um features (Na I 1.14, K I 1.17, Pa gamma/beta) in z ~ 3 G395M
+# spectra. Cached grids are tagged with the window so an old 1.1 um cache is
+# never loaded by mistake. Changed 2026-09-17.
+NSTART = 99      # 0.36 um
+# Default: the whole file. Set the environment variable ALFA_NEND (a row index,
+# e.g. 6600 = 1.30 um) before importing alfa to use a shorter grid: model
+# evaluation time scales with the grid length, not with the data length.
+NEND = int(os.environ.get("ALFA_NEND", 10566))     # 2.5 um (was 5830 = 1.10 um)
+# Number of low-slope IMF grid points to skip. alf uses 2 (slopes start at 0.9); the VCJ
+# files also hold slopes 0.5 and 0.7. Set ALFA_NIMFOFF=0 before importing alfa to load them.
+NIMFOFF = int(os.environ.get("ALFA_NIMFOFF", 2))
+GRID_TAG = (f"_{NSTART}_{NEND}" if (NSTART, NEND) != (99, 5830) else "") + (f"_imfoff{NIMFOFF}" if NIMFOFF != 2 else "")
+
+
 class Ssp():
     def __init__(self, kroupa_shortcut=True, imf_vary=False):
         self.imf_vary = imf_vary
         self.agegrid = np.array([1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.5])
         self.logagegrid = np.log10(self.agegrid)
         self.logzgrid = np.array([-1.5, -1.0, -0.5, 0.0, 0.25])
-        self.nstart = 99 # 0.36 um
-        self.nend   = 5830 # 1.1um
+        self.nstart = NSTART
+        self.nend   = NEND
 
         # IMF grid: 14 usable slopes from 0.9 to 3.5 in steps of 0.2
         # (nimfoff=2 skips the first two entries of the 16-point file grid)
-        self.nimfoff = 2
-        self.imfgrid = np.array([0.5 + (i - 1 + self.nimfoff) / 5 for i in range(1, 15)])
+        self.nimfoff = NIMFOFF
+        self.imfgrid = np.array([0.5 + (i - 1 + self.nimfoff) / 5 for i in range(1, 17 - self.nimfoff)])
 
         if imf_vary:
-            cache = f"{ALFA_INFILES}VCJ_IMF_grid_alfa.npy"
+            cache = f"{ALFA_INFILES}VCJ_IMF_grid_alfa{GRID_TAG}.npy"
             if kroupa_shortcut and os.path.isfile(cache):
                 self.ssp_grid = np.load(cache)
                 tmp = np.array(pd.read_csv(
@@ -245,8 +291,8 @@ class Ssp():
                 self.populate_imf_grid()
         else:
             self.get_kroupa_index()
-            if kroupa_shortcut and os.path.isfile(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy"):
-                self.ssp_grid = np.load(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy")
+            if kroupa_shortcut and os.path.isfile(f"{ALFA_INFILES}VCJ_Kroupa_alfa{GRID_TAG}.npy"):
+                self.ssp_grid = np.load(f"{ALFA_INFILES}VCJ_Kroupa_alfa{GRID_TAG}.npy")
                 tmp = np.array(pd.read_csv(
                     f"{ALFA_INFILES}VCJ_v8_mcut0.08_t07.0_Zm0.5.ssp.imf_varydoublex.s100",
                     sep=r'\s+', header=None, comment='#'))
@@ -288,7 +334,7 @@ class Ssp():
                         col = (i1 + self.nimfoff) * nfile + (i2 + self.nimfoff)
                         self.ssp_grid[:, i1, i2, j, k] = tmp[self.nstart:self.nend, col + 1]
         self.wave = tmp[self.nstart:self.nend, 0]
-        np.save(f"{ALFA_INFILES}VCJ_IMF_grid_alfa.npy", self.ssp_grid)
+        np.save(f"{ALFA_INFILES}VCJ_IMF_grid_alfa{GRID_TAG}.npy", self.ssp_grid)
 
     def populate_grid(self):
         self.ssp_grid = np.zeros([self.nend-self.nstart,
@@ -305,7 +351,7 @@ class Ssp():
         self.wave = tmp[self.nstart:self.nend,0]
         
         # save to file
-        np.save(f"{ALFA_INFILES}VCJ_Kroupa_alfa.npy",self.ssp_grid)
+        np.save(f"{ALFA_INFILES}VCJ_Kroupa_alfa{GRID_TAG}.npy",self.ssp_grid)
 
 
     def set_up_interpolator(self):
@@ -328,8 +374,8 @@ class Rfn():
         self.agegrid = np.array([1,3,5,9,13])
         self.logagegrid = np.log10(self.agegrid)
         self.logzgrid = np.array([-1.5, -1.0, -0.5, 0.0, 0.25])
-        self.nstart = 99 # 0.36 um
-        self.nend   = 5830 # 1.1um
+        self.nstart = NSTART
+        self.nend   = NEND
         
         self.rfn_cols = ['lam','solar','nap','nam','cap','cam','fep','fem',
                       'cp','cm','d1','np','nm','ap','tip','tim','mgp','mgm',

@@ -16,6 +16,15 @@ class Info:
             self.nsteps = 8000
             self.nsteps_save = 100
 
+        # 'nuts' sampler settings (alfa/nuts_sampler.py)
+        self.nuts_warmup = 500
+        self.nuts_draws = 1000
+        self.nuts_chains = 2
+        self.nuts_starts = 32
+        self.nuts_poly = 'marginal'
+        self.nuts_dense = False
+        self.nuts_seed = 0
+
         # which parameters (if any) do you want to "pre-fit"?
         # if diff_ev_parameters is empty, then the code will skip this step
         self.diff_ev_parameters = ['velz','sigma','logage','zH']
@@ -34,6 +43,13 @@ class Info:
 
         # set the polynomial degree for normalization
         self.poly_degree = 'default' # 'default' or int
+
+        # two-process-constrained abundance mode (see alfa/two_process_mode.py).
+        # When True, fit only (zH, feh, mgh) + kinematics/age/emission/jitter and
+        # slave all other elements. two_process_config is a JSON-able dict (or
+        # None for defaults) so it round-trips through save/load_settings.
+        self.two_process_mode = False
+        self.two_process_config = None
 
         # you'll end up putting the data here
         self.filename = None
