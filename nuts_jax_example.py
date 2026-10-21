@@ -4,7 +4,8 @@
 
 The parameter set and priors are the Conroy18 ones from alfa_config.py (20 parameters). Sampling runs in an
 unbounded coordinate w with theta = lo + (hi - lo) * sigmoid(w) (uniform box prior; the Jacobian is included),
-starts each chain at a short BFGS optimum from the alfα default position (jittered), and uses blackjax's
+climbs with L-BFGS-B from --starts random points in the box (plus the alfα default), reports the distinct
+optima found, starts every chain at the best one (jittered), and uses blackjax's
 window adaptation (step size + diagonal mass matrix) before the kept draws.
 
 Outputs under $ALFA_OUT: <name>_nuts_jax.npz (draws, chain diagnostics) and <name>_nuts_jax_corner.png.
@@ -75,6 +76,8 @@ def main():
     ap.add_argument("--draws", type=int, default=1000)
     ap.add_argument("--chains", type=int, default=2)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--starts", type=int, default=32,
+                    help="L-BFGS-B climbs before sampling (1 = from the alfα default only); the chains start at the best")
     ap.add_argument("--dense", action="store_true",
                     help="adapt a dense (full) mass matrix instead of a diagonal one; needed when parameters are strongly correlated")
     ap.add_argument("--poly", choices=["profile", "sample", "marginal"], default="profile",
@@ -116,25 +119,43 @@ def main():
         log_jac = jnp.sum(jnp.log(hi - lo) + jnp.log(s) + jnp.log1p(-s))
         return lnlike(to_theta(w)) + log_jac
 
-    # --- start: BFGS from the alfα default position (jittered per chain) ---------------------------
+    # --- start: multi-start L-BFGS-B, chains begin at the best optimum ------------------------------
     key = jax.random.key(a.seed)
-    w0 = to_w(jnp.array(defaults, float))
     neg = jax.jit(jax.value_and_grad(lambda w: -logdensity(w)))
 
     def neg_np(w):
         v, g = neg(jnp.asarray(w))
         return float(v), np.asarray(g, float)
 
-    starts = []
+    rng = np.random.default_rng(a.seed)
+    w0 = np.asarray(to_w(jnp.array(defaults, float)))
+    w_init = [w0] + [np.asarray(to_w(jnp.asarray(lo + (hi - lo) * rng.random(D)))) for _ in range(a.starts - 1)]
     t0 = time.time()
+    optima, lp = [], []
+    for wc in w_init:
+        res = minimize(neg_np, wc, jac=True, method="L-BFGS-B", options=dict(maxiter=3000))
+        optima.append(res.x); lp.append(-res.fun)
+    optima, lp = np.array(optima), np.array(lp)
+    # cluster the optima: greedy, best first, radius 1 in w
+    order, label, centres = np.argsort(-lp), -np.ones(len(lp), int), []
+    for i in order:
+        if label[i] < 0:
+            label[(np.linalg.norm(optima - optima[i], axis=1) < 1.0) & (label < 0)] = len(centres)
+            centres.append(i)
+    print(f"multi-start: {a.starts} L-BFGS-B climbs ({len(w_init) - 1} from random points in the prior box + the alfα "
+          f"default) in {time.time() - t0:.0f} s; {len(centres)} distinct optima:")
+    for j, i in enumerate(centres):
+        th = np.asarray(to_theta(jnp.asarray(optima[i])))
+        print(f"  basin {j}: {np.sum(label == j):2d} climbs, log-density {lp[i]:9.1f}" +
+              "".join(f" {n} {th[names.index(n)]:+.3g}" for n in ("logage", "zH", "feh", "mgh", "sigma", "velz") if n in names))
+    if len(centres) > 1 and lp[centres[0]] - lp[centres[1]] < 10:
+        print("  WARNING: a second basin lies within 10 log-density units of the best; the posterior may be "
+              "multimodal and these chains sample only the best basin (run Sailfish, or NUTS from each basin).")
+    best = optima[centres[0]]
+    starts = []
     for c in range(a.chains):
         key, k = jax.random.split(key)
-        wc = np.asarray(w0 + 0.1 * jax.random.normal(k, (D,)))
-        res = minimize(neg_np, wc, jac=True, method="L-BFGS-B", options=dict(maxiter=2000))
-        starts.append(jnp.asarray(res.x))
-        print(f"chain {c}: L-BFGS-B {res.nit} iterations, log-density {-res.fun:.1f} (start {-neg_np(wc)[0]:.1f}), "
-              f"{res.message}")
-    print(f"optimisation {time.time() - t0:.0f} s")
+        starts.append(jnp.asarray(best) + 0.05 * jax.random.normal(k, (D,)))
 
     # --- NUTS with window adaptation -------------------------------------------------------------
     draws = np.zeros((a.chains, a.draws, D))
